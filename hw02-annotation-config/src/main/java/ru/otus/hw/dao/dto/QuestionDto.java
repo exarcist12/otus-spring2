@@ -3,7 +3,6 @@ package ru.otus.hw.dao.dto;
 import com.opencsv.bean.CsvBindAndSplitByPosition;
 import com.opencsv.bean.CsvBindByPosition;
 import lombok.Data;
-import org.springframework.stereotype.Repository;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 
