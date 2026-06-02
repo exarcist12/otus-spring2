@@ -20,7 +20,7 @@ public class TestServiceImpl implements TestService {
     @Override
     public TestResult executeTestFor(Student student) {
         ioService.printLine("");
-        ioService.printFormattedLine("Please answer the questions below%n");
+        ioService.printLineLocalized("TestService.answer.the.questions");
         var questions = questionDao.findAll();
         var testResult = new TestResult(student);
 
@@ -35,7 +35,8 @@ public class TestServiceImpl implements TestService {
                 ioService.printFormattedLine("   %d) %s", j + 1, answer.text());
             }
             ioService.printLine("");
-            var yourAnswer = ioService.readStringWithPrompt("Please input your answer: ");
+            ioService.printLineLocalized("TestService.answer.the.questions");
+            var yourAnswer = ioService.readStringWithPrompt("");
 
             boolean isAnswerValid = answers.get(Integer.parseInt(yourAnswer) - 1).isCorrect();
             testResult.applyAnswer(questions.get(i), isAnswerValid);
