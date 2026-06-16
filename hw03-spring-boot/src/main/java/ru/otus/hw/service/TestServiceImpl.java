@@ -25,9 +25,7 @@ public class TestServiceImpl implements TestService {
         var testResult = new TestResult(student);
 
         for (int i = 0; i < questions.size(); i++) {
-            if (questions.get(i).text().startsWith("# Добавить сюда своих вопросов. Эту строку надо пропустить")) {
-                continue;
-            }
+
             ioService.printLine(questions.get(i).text());
             List<Answer> answers = questions.get(i).answers();
             for (int j = 0; j < answers.size(); j++) {

@@ -12,7 +12,6 @@ import ru.otus.hw.exceptions.QuestionReadException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,13 +23,16 @@ public class CsvQuestionDao implements QuestionDao {
     @Override
     public List<Question> findAll() {
         String fileName = fileNameProvider.getTestFileName();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            if (inputStream == null) {
-                throw new QuestionReadException("File not found: " + fileName);
-            }
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+
+        if (inputStream == null) {
+            throw new QuestionReadException("File not found: " + fileName);
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
                     .withType(QuestionDto.class)
+                    .withSkipLines(1)
                     .withSeparator(';')
                     .build();
 
@@ -41,6 +43,6 @@ public class CsvQuestionDao implements QuestionDao {
         } catch (Exception e) {
             throw new QuestionReadException("Error reading questions", e);
         }
-
     }
+
 }
