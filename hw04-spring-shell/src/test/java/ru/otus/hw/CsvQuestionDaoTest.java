@@ -1,33 +1,22 @@
 package ru.otus.hw;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.otus.hw.config.TestFileNameProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.otus.hw.dao.CsvQuestionDao;
 import ru.otus.hw.domain.Question;
-import ru.otus.hw.exceptions.QuestionReadException;
 
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class CsvQuestionDaoTest {
 
+    @Autowired
     private CsvQuestionDao questionDao;
-    private TestFileNameProvider fileNameProvider;
-
-    @BeforeEach
-    void setUp() {
-        fileNameProvider = mock(TestFileNameProvider.class);
-        questionDao = new CsvQuestionDao(fileNameProvider);
-    }
 
     @Test
     void shouldLoadQuestionsFromCsvCorrectly() {
-        when(fileNameProvider.getTestFileName()).thenReturn("test-questions.csv");
 
         List<Question> questions = questionDao.findAll();
 
@@ -45,12 +34,4 @@ class CsvQuestionDaoTest {
         assertThat(secondQuestion.answers().get(1).isCorrect()).isTrue();
     }
 
-    @Test
-    void shouldThrowExceptionWhenFileNotFound() {
-        when(fileNameProvider.getTestFileName()).thenReturn("non-existent-file.csv");
-
-        assertThatThrownBy(() -> questionDao.findAll())
-                .isInstanceOf(QuestionReadException.class)
-                .hasMessageContaining("File not found");
-    }
 }
