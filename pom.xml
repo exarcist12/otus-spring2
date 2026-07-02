@@ -11,6 +11,7 @@
     <modules>
         <module>hw01-xml-config</module>
         <module>hw05-jdbc-simple</module>
+        <module>hw05-jdbc-hard</module>
     </modules>
 
     <properties>
