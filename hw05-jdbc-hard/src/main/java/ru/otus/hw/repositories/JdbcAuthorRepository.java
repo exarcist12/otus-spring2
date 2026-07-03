@@ -38,7 +38,6 @@ public class JdbcAuthorRepository implements AuthorRepository {
         var authors = namedParameterJdbcTemplate.query(sql, params, new AuthorRowMapper());
         return authors.stream().findFirst();
     }
-
     private static class AuthorRowMapper implements RowMapper<Author> {
 
         @Override
