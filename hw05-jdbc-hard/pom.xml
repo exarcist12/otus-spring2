@@ -82,7 +82,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <configLocation>${checkstyle.config.url}</configLocation>
+                    <configLocation>checkstyle.xml</configLocation>
                 </configuration>
                 <executions>
                     <execution>
