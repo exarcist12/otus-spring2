@@ -18,6 +18,7 @@ public class Genre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private long id;
+
     @Column(name = "name", nullable = false)
     private String name;
 }

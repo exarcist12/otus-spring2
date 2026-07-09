@@ -16,6 +16,7 @@ public class JdbcCommentRepository implements CommentRepository {
     public Optional<Comment> findById(long id) {
         return Optional.ofNullable(em.find(Comment.class, id));
     }
+
     @Override
     public List<Comment> findByBookId(long bookId) {
         return em.createQuery(
@@ -24,6 +25,7 @@ public class JdbcCommentRepository implements CommentRepository {
                 .getResultList();
 
     }
+
     @Override
     public Comment save(Comment comment) {
         if (comment.getId() == 0) {
@@ -33,6 +35,7 @@ public class JdbcCommentRepository implements CommentRepository {
             return em.merge(comment);
         }
     }
+
     @Override
     public void deleteById(long id) {
         em.createQuery("DELETE FROM Comment c WHERE c.id = :id")

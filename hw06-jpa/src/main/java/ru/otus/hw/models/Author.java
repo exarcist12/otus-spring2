@@ -18,6 +18,7 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private long id;
+
     @Column(name = "full_name", nullable = false)
     private String fullName;
 }

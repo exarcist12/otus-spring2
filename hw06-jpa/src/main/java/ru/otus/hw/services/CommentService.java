@@ -1,9 +1,6 @@
 package ru.otus.hw.services;
 
 import ru.otus.hw.models.Comment;
-import ru.otus.hw.models.Genre;
-
-import ru.otus.hw.models.Comment;
 
 import java.util.List;
 import java.util.Optional;
