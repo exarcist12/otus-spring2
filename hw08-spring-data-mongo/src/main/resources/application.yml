@@ -1,0 +1,28 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: company
+
+#de:
+#  flapdoodle:
+#    mongodb:
+#      embedded:
+#        version: 4.0.2
+
+mongock:
+  enabled: true
+  runner-type: "InitializingBean"
+  migration-scan-package: ru.otus.hw.mongock.changelog
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local
+
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
+    io.mongock: DEBUG

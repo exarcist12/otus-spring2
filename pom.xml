@@ -14,6 +14,7 @@
         <module>hw05-jdbc-hard</module>
         <module>hw06-jpa</module>
         <module>hw07-spring-data-jpa</module>
+        <module>hw08-spring-data-mongo</module>
     </modules>
 
     <properties>

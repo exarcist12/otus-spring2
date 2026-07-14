@@ -1,0 +1,18 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  data:
+    mongodb:
+      host: localhost
+      port: 0  # random port
+      database: library_test
+
+  mongodb:
+    embedded:
+      version: 4.0.2
+
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
+    de.flapdoodle.embed.mongo: DEBUG
