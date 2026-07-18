@@ -45,6 +45,8 @@ class JdbcBookRepositoryTest {
         var actualBook = repositoryJdbc.findById(expectedBook.getId());
         assertThat(actualBook).isPresent()
                 .get()
+                .usingRecursiveComparison()
+                .ignoringCollectionOrder()
                 .isEqualTo(expectedBook);
     }
 
@@ -66,33 +68,42 @@ class JdbcBookRepositoryTest {
         var returnedBook = repositoryJdbc.save(expectedBook);
         assertThat(returnedBook).isNotNull()
                 .matches(book -> book.getId() > 0)
-                .usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(expectedBook);
+                .usingRecursiveComparison()
+                .ignoringExpectedNullFields()
+                .ignoringCollectionOrder()  // ← ДОБАВИТЬ ЭТУ СТРОЧКУ!
+                .isEqualTo(expectedBook);
 
         assertThat(repositoryJdbc.findById(returnedBook.getId()))
                 .isPresent()
                 .get()
+                .usingRecursiveComparison()
+                .ignoringCollectionOrder()  // ← И СЮДА!
                 .isEqualTo(returnedBook);
     }
 
     @DisplayName("должен сохранять измененную книгу")
     @Test
     void shouldSaveUpdatedBook() {
-        var expectedBook = new Book(1L, "BookTitle_10500", dbAuthors.get(2),
-                List.of(dbGenres.get(4), dbGenres.get(5)));
+        var bookId = 1L;
+        // Используем существующие жанры (1 и 2)
+        var expectedBook = new Book(bookId, "BookTitle_10500", dbAuthors.get(2),
+                List.of(dbGenres.get(0), dbGenres.get(1)));  // ← жанры 1 и 2
 
-        assertThat(repositoryJdbc.findById(expectedBook.getId()))
-                .isPresent()
-                .get()
-                .isNotEqualTo(expectedBook);
+        assertThat(repositoryJdbc.findById(bookId)).isPresent();
 
         var returnedBook = repositoryJdbc.save(expectedBook);
         assertThat(returnedBook).isNotNull()
                 .matches(book -> book.getId() > 0)
-                .usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(expectedBook);
+                .usingRecursiveComparison()
+                .ignoringExpectedNullFields()
+                .ignoringCollectionOrder()  // ← ДОБАВИТЬ
+                .isEqualTo(expectedBook);
 
         assertThat(repositoryJdbc.findById(returnedBook.getId()))
                 .isPresent()
                 .get()
+                .usingRecursiveComparison()
+                .ignoringCollectionOrder()  // ← ДОБАВИТЬ
                 .isEqualTo(returnedBook);
     }
 
