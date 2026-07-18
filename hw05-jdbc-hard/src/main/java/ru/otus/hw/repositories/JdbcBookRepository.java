@@ -196,30 +196,46 @@ public class JdbcBookRepository implements BookRepository {
         @Override
         public Book extractData(ResultSet rs) throws SQLException, DataAccessException {
             Book book = null;
-            Author author = new Author();
+            Author author = null;
             Set<Genre> genres = new HashSet<>();
+
             while (rs.next()) {
                 if (book == null) {
-                    book = new Book();
-                    book.setId(rs.getLong("book_id"));
-                    book.setTitle(rs.getString("title"));
-                    author = new Author();
-                    author.setId(rs.getLong("author_id"));
-                    author.setFullName(rs.getString("full_name"));
+                    book = createBook(rs);
+                    author = createAuthor(rs);
                     book.setAuthor(author);
                 }
-                var genreId = rs.getLong("genre_id");
-                if (!rs.wasNull()) {
-                    var genre = new Genre();
-                    genre.setId(genreId);
-                    genre.setName(rs.getString("genre_name"));
-                    genres.add(genre);
-                }
+                addGenreIfPresent(rs, genres);
             }
+
             if (book != null) {
                 book.setGenres(new ArrayList<>(genres));
             }
             return book;
+        }
+
+        private Book createBook(ResultSet rs) throws SQLException {
+            Book book = new Book();
+            book.setId(rs.getLong("book_id"));
+            book.setTitle(rs.getString("title"));
+            return book;
+        }
+
+        private Author createAuthor(ResultSet rs) throws SQLException {
+            Author author = new Author();
+            author.setId(rs.getLong("author_id"));
+            author.setFullName(rs.getString("full_name"));
+            return author;
+        }
+
+        private void addGenreIfPresent(ResultSet rs, Set<Genre> genres) throws SQLException {
+            long genreId = rs.getLong("genre_id");
+            if (!rs.wasNull()) {
+                Genre genre = new Genre();
+                genre.setId(genreId);
+                genre.setName(rs.getString("genre_name"));
+                genres.add(genre);
+            }
         }
     }
 
