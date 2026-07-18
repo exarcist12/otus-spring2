@@ -2,8 +2,6 @@ package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,10 +13,8 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,8 +24,8 @@ import java.util.stream.Collectors;
 public class JdbcBookRepository implements BookRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final GenreRepository genreRepository;
 
+    private final GenreRepository genreRepository;
 
 
     @Override
@@ -200,21 +196,18 @@ public class JdbcBookRepository implements BookRepository {
         @Override
         public Book extractData(ResultSet rs) throws SQLException, DataAccessException {
             Book book = null;
-            Author author = null;
+            Author author = new Author();
             Set<Genre> genres = new HashSet<>();
-
             while (rs.next()) {
                 if (book == null) {
                     book = new Book();
                     book.setId(rs.getLong("book_id"));
                     book.setTitle(rs.getString("title"));
-
                     author = new Author();
                     author.setId(rs.getLong("author_id"));
                     author.setFullName(rs.getString("full_name"));
                     book.setAuthor(author);
                 }
-
                 var genreId = rs.getLong("genre_id");
                 if (!rs.wasNull()) {
                     var genre = new Genre();
@@ -223,11 +216,9 @@ public class JdbcBookRepository implements BookRepository {
                     genres.add(genre);
                 }
             }
-
             if (book != null) {
                 book.setGenres(new ArrayList<>(genres));
             }
-
             return book;
         }
     }
