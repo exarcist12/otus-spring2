@@ -1,4 +1,5 @@
 package ru.otus.hw.services;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
+
+    private final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
+
     private final AuthorRepository authorRepository;
-    private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
+
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
