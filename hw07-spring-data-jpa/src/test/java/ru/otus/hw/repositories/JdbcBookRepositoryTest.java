@@ -77,7 +77,7 @@ class JdbcBookRepositoryTest {
     void shouldSaveUpdatedBook() {
         var bookId = 1L;
         var expectedBook = new Book(bookId, "BookTitle_10500", dbAuthors.get(2),
-                List.of(dbGenres.get(4), dbGenres.get(5)));
+                List.of(dbGenres.get(0), dbGenres.get(1)));
 
         assertThat(repositoryJdbc.findById(bookId)).isPresent();
 
