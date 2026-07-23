@@ -1,8 +1,8 @@
-spring:
-  data:
-    mongodb:
-#      port: 0
-      database: library_test
+#spring:
+#  data:
+#    mongodb:
+##      port: 0
+#      database: library_test
 
 mongock:
   enabled: false
