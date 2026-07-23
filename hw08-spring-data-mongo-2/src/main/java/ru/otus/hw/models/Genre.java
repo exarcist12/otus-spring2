@@ -16,7 +16,6 @@ public class Genre {
     @Id
     private String id;
 
-    @Field("name")
     private String name;
 
     @Override

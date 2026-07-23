@@ -16,7 +16,6 @@ public class Author {
     @Id
     private String id;
 
-    @Field("full_name")
     private String fullName;
 
     @Override

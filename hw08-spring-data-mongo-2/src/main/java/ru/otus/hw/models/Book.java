@@ -20,16 +20,12 @@ public class Book {
     @Id
     private String id;
 
-    @Field("title")
     private String title;
 
-    @Field("author")
     private Author author;
 
-    @Field("genres")
     private List<Genre> genres = new ArrayList<>();
 
-    @Field("comments")
     private List<Comment> comments = new ArrayList<>();
 
     @Override

@@ -34,23 +34,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book insert(String title, String authorId, Set<String> genresIds) {
-        return save(null, title, authorId, genresIds);
-    }
-
-    @Override
-    public Book update(String id, String title, String authorId, Set<String> genresIds) {
-        if (!bookRepository.existsById(id)) {
-            throw new EntityNotFoundException("Book with id %d not found".formatted(id));
-        }
-        return save(id, title, authorId, genresIds);
-    }
-
-    @Override
-    public void deleteById(String id) {
-        bookRepository.deleteById(id);
-    }
-
-    private Book save(String id, String title, String authorId, Set<String> genresIds) {
         if (isEmpty(genresIds)) {
             throw new IllegalArgumentException("Genres ids must not be empty");
         }
@@ -64,8 +47,23 @@ public class BookServiceImpl implements BookService {
         }
 
         var book = new Book();
-        if (id != null && !id.isEmpty()) {
-            book.setId(id);
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setGenres(genres);
+
+        return bookRepository.save(book);
+    }
+
+    @Override
+    public Book update(String id, String title, String authorId, Set<String> genresIds) {
+
+        var book = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(id)));
+        var author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException("Author with id %s not found".formatted(authorId)));
+        var genres = genreRepository.findAllByIdIn(genresIds.stream().toList());
+        if (isEmpty(genres) || genresIds.size() != genres.size()) {
+            throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
         book.setTitle(title);
         book.setAuthor(author);
@@ -73,4 +71,10 @@ public class BookServiceImpl implements BookService {
 
         return bookRepository.save(book);
     }
+
+    @Override
+    public void deleteById(String id) {
+        bookRepository.deleteById(id);
+    }
+
 }

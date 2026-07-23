@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
 
         var comment = new Comment();
         comment.setText(text);
-        comment.setBookId(bookId);
+        comment.setBook(book);
 
         return commentRepository.save(comment);
     }

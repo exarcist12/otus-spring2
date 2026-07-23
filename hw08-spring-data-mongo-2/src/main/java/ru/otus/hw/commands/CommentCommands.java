@@ -21,7 +21,7 @@ public class CommentCommands {
                         "Id: %s, Text: %s, BookId: %s",
                         comment.getId(),
                         comment.getText(),
-                        comment.getBookId()
+                        comment.getBook().getId()
                 ))
                 .orElse("Comment with id %s not found".formatted(id));
     }
@@ -47,7 +47,7 @@ public class CommentCommands {
         return "Comment created: Id: %s, Text: %s, BookId: %s".formatted(
                 comment.getId(),
                 comment.getText(),
-                comment.getBookId()
+                comment.getBook().getId()
         );
     }
 

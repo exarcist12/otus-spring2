@@ -1,17 +1,9 @@
 spring:
-  main:
-    allow-bean-definition-overriding: true
   data:
     mongodb:
       host: localhost
       port: 27017
       database: company
-
-#de:
-#  flapdoodle:
-#    mongodb:
-#      embedded:
-#        version: 4.0.2
 
 mongock:
   enabled: true
