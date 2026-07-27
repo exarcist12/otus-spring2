@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Жанры</title>
+    <style>
+        body { padding: 50px; }
+        table { border-collapse: collapse; width: 500px; }
+        th, td { border: 1px solid steelblue; padding: 5px; text-align: left; }
+        .btn { padding: 3px 8px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-add { background: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+<h3>Жанры</h3>
+
+<table>
+    <thead>
+    <tr><th>ID</th><th>Название</th><th>Действие</th></tr>
+    </thead>
+    <tbody>
+    <tr>
+        <form th:action="@{/genres}" th:method="post" th:object="${genre}">
+            <td></td>
+            <td><input type="text" th:field="*{name}" placeholder="Название жанра" /></td>
+            <td><button type="submit" class="btn btn-add">Добавить</button></td>
+        </form>
+    </tr>
+    <tr th:each="genre : ${genres}">
+        <td th:text="${genre.id}"></td>
+        <td th:text="${genre.name}"></td>
+        <td>
+            <form th:action="@{/genres/{id}/delete(id=${genre.id})}" method="post">
+                <button type="submit" class="btn btn-delete">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<a href="/">На главную</a>
+</body>
+</html>

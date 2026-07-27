@@ -11,6 +11,7 @@
     <modules>
         <module>hw01-xml-config</module>
         <module>hw07-spring-data-jpa-2</module>
+        <module>hw09-spring-mvc-view</module>
     </modules>
 
     <properties>
