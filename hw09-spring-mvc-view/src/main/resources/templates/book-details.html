@@ -17,7 +17,7 @@
 <h3>Книга</h3>
 <div class="details">
     <p><strong>Название:</strong> <span th:text="${book.title}"></span></p>
-    <p><strong>Автор:</strong> <span th:text="${book.author.fullName}"></span></p>
+    <p><strong>Автор:</strong> <span th:text="${book.authorName}"></span></p>
     <p><strong>Жанры:</strong> <span th:text="${#strings.listJoin(book.genres.![name], ', ')}"></span></p>
 
     <h4>Комментарии</h4>
