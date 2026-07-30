@@ -4,101 +4,23 @@
     <meta charset="UTF-8"/>
     <title>Библиотека</title>
     <style type="text/css">
-        body {
-            padding: 50px;
-        }
-
-        .books {
-            border: 1px solid steelblue;
-            width: 900px;
-            border-collapse: collapse;
-        }
-
-        .books tr td, th {
-            padding: 5px;
-            border: 1px solid steelblue;
-        }
-
-        .books td:first-child {
-            width: 30px;
-        }
-
-        .books td:nth-child(2) {
-            width: 200px;
-        }
-
-        .books td:nth-child(3) {
-            width: 150px;
-        }
-
-        .books td:nth-child(4) {
-            width: 250px;
-        }
-
-        .books td:last-child {
-            width: 200px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .books td:last-child form {
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-        }
-
-        .books td:last-child a {
-            display: inline-block;
-            margin-right: 5px;
-            padding: 3px 8px;
-            text-decoration: none;
-            background-color: #aaa;
-            color: white;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-
-        .books td:last-child .btn {
-            padding: 3px 8px;
-            font-size: 12px;
-            margin: 0 2px;
-        }
-        select, input[type="text"] {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            padding: 3px 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 3px;
-        }
-
-        .btn-add {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .btn-save {
-            background-color: #2196F3;
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .btn-cancel {
-            background-color: #aaa;
-            color: white;
-        }
-
-        form {
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-        }
+        body { padding: 50px; }
+        .books { border: 1px solid steelblue; width: 900px; border-collapse: collapse; }
+        .books tr td, th { padding: 5px; border: 1px solid steelblue; }
+        .books td:first-child { width: 30px; }
+        .books td:nth-child(2) { width: 200px; }
+        .books td:nth-child(3) { width: 150px; }
+        .books td:nth-child(4) { width: 250px; }
+        .books td:last-child { width: 200px; text-align: center; white-space: nowrap; }
+        .books td:last-child form { display: inline-block; margin: 0; padding: 0; }
+        .books td:last-child a { display: inline-block; margin-right: 5px; padding: 3px 8px; text-decoration: none; background-color: #aaa; color: white; border-radius: 3px; font-size: 12px; }
+        .books td:last-child .btn { padding: 3px 8px; font-size: 12px; margin: 0 2px; }
+        select, input[type="text"] { width: 100%; box-sizing: border-box; }
+        .btn { padding: 3px 10px; cursor: pointer; border: none; border-radius: 3px; }
+        .btn-add { background-color: #4CAF50; color: white; }
+        .btn-save { background-color: #2196F3; color: white; }
+        .btn-delete { background-color: #f44336; color: white; }
+        form { display: inline-block; margin: 0; padding: 0; }
     </style>
 </head>
 <body>
@@ -118,7 +40,7 @@
     <tbody>
 
     <tr>
-        <form th:action="@{/books}" th:method="post" th:object="${bookForm}">
+        <form th:action="@{/books}" th:method="post" th:object="${bookCreateDto}">
             <td></td>
             <td><input type="text" th:field="*{title}" placeholder="Название" /></td>
             <td>
@@ -141,10 +63,11 @@
         </form>
     </tr>
 
-    <tr th:each="book : ${books}" th:object="${book}">
-        <td th:text="*{id}">1</td>
+    <!-- Строки книг -->
+    <tr th:each="book : ${books}">
+        <td th:text="${book.id}">1</td>
         <td>
-            <input type="text" name="title" th:value="*{title}"
+            <input type="text" name="title" th:value="${book.title}"
                    th:form="'update-form-' + ${book.id}" />
         </td>
         <td>
@@ -152,15 +75,15 @@
                 <option th:each="author : ${authors}"
                         th:value="${author.id}"
                         th:text="${author.fullName}"
-                        th:selected="${author.id == book.author.id}"></option>
+                        th:selected="${author.id == book.authorId}"></option>
             </select>
         </td>
         <td>
-            <select name="genreIds" multiple  th:form="'update-form-' + ${book.id}">
+            <select name="genreIds" multiple th:form="'update-form-' + ${book.id}">
                 <option th:each="genre : ${genres}"
                         th:value="${genre.id}"
                         th:text="${genre.name}"
-                        th:selected="${book.genres.contains(genre)}"></option>
+                        th:selected="${book.genres.![id].contains(genre.id)}"></option>
             </select>
         </td>
         <td>
