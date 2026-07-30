@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.otus.hw.dto.CommentDto;
-import ru.otus.hw.models.Comment;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
