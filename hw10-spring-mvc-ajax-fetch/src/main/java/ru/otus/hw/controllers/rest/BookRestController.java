@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.BookService;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public class BookRestController {
     public List<BookDto> getAllBooks() {
         List<BookDto> books = bookService.findAll();
         if (books.isEmpty()) {
-            throw new EntityNotFoundException("Books not found");
+            return List.of();
         }
         return books;
     }

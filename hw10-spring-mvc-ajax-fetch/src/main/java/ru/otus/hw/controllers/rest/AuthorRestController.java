@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.otus.hw.models.Author;
+import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.services.AuthorService;
 
 import java.util.List;
@@ -23,14 +23,14 @@ public class AuthorRestController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<Author> getAllAuthors() {
+    public List<AuthorDto> getAllAuthors() {
         return authorService.findAll();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author createAuthor(@RequestBody Author author) {
-        return authorService.insert(author);
+    public AuthorDto createAuthor(@RequestBody AuthorDto authorDto) {
+        return authorService.insert(authorDto);
     }
 
     @DeleteMapping("/{id}")

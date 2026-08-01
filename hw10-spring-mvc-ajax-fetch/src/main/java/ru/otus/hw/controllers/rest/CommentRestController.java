@@ -9,7 +9,6 @@ import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books/{bookId}/comments")
@@ -20,8 +19,7 @@ public class CommentRestController {
 
     @GetMapping
     public List<CommentDto> getComments(@PathVariable Long bookId) {
-        return commentService.findByBookId(bookId).stream()
-                .map(c -> new CommentDto(c.getId(), c.getText(), c.getBook().getId()))
-                .collect(Collectors.toList());
+        return commentService.findByBookId(bookId);
     }
+
 }

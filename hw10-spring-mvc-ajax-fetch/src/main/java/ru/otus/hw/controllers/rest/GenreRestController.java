@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.GenreService;
 
 import java.util.List;
@@ -23,14 +23,14 @@ public class GenreRestController {
     private final GenreService genreService;
 
     @GetMapping
-    public List<Genre> getAllGenres() {
+    public List<GenreDto> getAllGenres() {
         return genreService.findAll();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Genre createGenre(@RequestBody Genre genre) {
-        return genreService.insert(genre);
+    public GenreDto createGenre(@RequestBody GenreDto genreDto) {
+        return genreService.insert(genreDto);
     }
 
     @DeleteMapping("/{id}")
