@@ -1,5 +1,6 @@
 package ru.otus.hw.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.otus.hw.controllers.rest.AuthorRestController;
+import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.services.AuthorService;
 
@@ -41,10 +43,13 @@ class AuthorControllerTest {
     @Test
     @DisplayName("POST /api/authors должен создать автора")
     void shouldCreateAuthor() throws Exception {
-        Author newAuthor = new Author(3L, "New Author");
-        when(authorService.insert(any(Author.class))).thenReturn(newAuthor);
+        AuthorDto newAuthor = new AuthorDto(3L, "New Author");
+        when(authorService.insert(any(AuthorDto.class))).thenReturn(newAuthor);
 
-        String json = "{\"fullName\": \"New Author\"}";
+        AuthorDto requestDto = new AuthorDto(null, "New Author");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(requestDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/authors")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,7 +58,7 @@ class AuthorControllerTest {
                 .andExpect(jsonPath("$.id").value(3L))
                 .andExpect(jsonPath("$.fullName").value("New Author"));
 
-        verify(authorService, times(1)).insert(any(Author.class));
+        verify(authorService, times(1)).insert(any(AuthorDto.class));
     }
 
     @Test

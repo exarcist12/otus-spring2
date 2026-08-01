@@ -1,5 +1,6 @@
 package ru.otus.hw.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.otus.hw.controllers.rest.GenreRestController;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.GenreService;
 
@@ -39,12 +41,15 @@ class GenreControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/genres должен создать автора")
-    void shouldCreateAuthor() throws Exception {
-        Genre newGenre = new Genre(3L, "New Genre");
-        when(genreService.insert(any(Genre.class))).thenReturn(newGenre);
+    @DisplayName("POST /api/genres должен создать жанр")
+    void shouldCreateGenre() throws Exception {
+        GenreDto newGenre = new GenreDto(3L, "New Genre");
+        when(genreService.insert(any(GenreDto.class))).thenReturn(newGenre);
 
-        String json = "{\"name\": \"New Genre\"}";
+        GenreDto requestDto = new GenreDto(null, "New Genre");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(requestDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/genres")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,12 +58,12 @@ class GenreControllerTest {
                 .andExpect(jsonPath("$.id").value(3L))
                 .andExpect(jsonPath("$.name").value("New Genre"));
 
-        verify(genreService, times(1)).insert(any(Genre.class));
+        verify(genreService, times(1)).insert(any(GenreDto.class));
     }
 
     @Test
-    @DisplayName("DELETE /api/genres/{id} должен удалить автора")
-    void shouldDeleteAuthor() throws Exception {
+    @DisplayName("DELETE /api/genres/{id} должен удалить жанр")
+    void shouldDeleteGenre() throws Exception {
         doNothing().when(genreService).deleteById(1L);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/genres/1"))
