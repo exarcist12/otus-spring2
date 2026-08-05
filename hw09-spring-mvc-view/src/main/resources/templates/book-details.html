@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Просмотр книги</title>
+    <style>
+        body { padding: 50px; font-family: Arial, sans-serif; }
+        .details { border: 1px solid steelblue; padding: 20px; width: 500px; background: #f9f9f9; }
+        .details p { margin: 8px 0; }
+        .comments { margin-top: 20px; }
+        .comments li { padding: 5px; border-bottom: 1px dashed #ccc; }
+        .btn { padding: 5px 15px; border: none; border-radius: 3px; background: #aaa; color: white; text-decoration: none; cursor: pointer; }
+        .btn:hover { background: #888; }
+    </style>
+</head>
+<body>
+<h3>Книга</h3>
+<div class="details">
+    <p><strong>Название:</strong> <span th:text="${book.title}"></span></p>
+    <p><strong>Автор:</strong> <span th:text="${book.authorName}"></span></p>
+    <p><strong>Жанры:</strong> <span th:text="${#strings.listJoin(book.genres.![name], ', ')}"></span></p>
+
+    <h4>Комментарии</h4>
+    <ul class="comments">
+        <li th:each="comment : ${comments}" th:text="${comment.text}"></li>
+    </ul>
+    <p th:if="${comments.isEmpty()}">Комментариев пока нет.</p>
+</div>
+<br/>
+<a th:href="@{/}" class="btn">Назад</a>
+</body>
+</html>
