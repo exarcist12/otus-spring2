@@ -1,0 +1,27 @@
+CREATE TABLE authors (
+                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                         full_name VARCHAR(255)
+);
+
+CREATE TABLE genres (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(255)
+);
+
+CREATE TABLE books (
+                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       title VARCHAR(255),
+                       author_id BIGINT REFERENCES authors(id)
+);
+
+CREATE TABLE books_genres (
+                              book_id BIGINT REFERENCES books(id) ON DELETE CASCADE,
+                              genre_id BIGINT REFERENCES genres(id) ON DELETE CASCADE,
+                              PRIMARY KEY (book_id, genre_id)
+);
+
+CREATE TABLE comments (
+                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          text VARCHAR(1000),
+                          book_id BIGINT REFERENCES books(id) ON DELETE CASCADE
+);
