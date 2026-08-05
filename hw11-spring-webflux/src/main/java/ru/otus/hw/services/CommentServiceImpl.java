@@ -15,6 +15,7 @@ import ru.otus.hw.repositories.JdbcCommentRepository;
 public class CommentServiceImpl implements CommentService {
 
     private final JdbcCommentRepository commentRepository;
+
     private final JdbcBookRepository bookRepository;
 
     @Override

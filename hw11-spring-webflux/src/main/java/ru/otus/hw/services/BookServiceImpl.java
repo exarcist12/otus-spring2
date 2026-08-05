@@ -12,7 +12,11 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.BookGenre;
 import ru.otus.hw.models.Genre;
-import ru.otus.hw.repositories.*;
+import ru.otus.hw.repositories.JdbcAuthorRepository;
+import ru.otus.hw.repositories.JdbcBookGenreRepository;
+import ru.otus.hw.repositories.JdbcBookRepository;
+import ru.otus.hw.repositories.JdbcGenreRepository;
+import ru.otus.hw.repositories.BookWithDetails;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,8 +28,11 @@ import java.util.Map;
 public class BookServiceImpl implements BookService {
 
     private final JdbcBookRepository jdbcBookRepository;
+
     private final JdbcAuthorRepository jdbcAuthorRepository;
+
     private final JdbcGenreRepository jdbcGenreRepository;
+
     private final JdbcBookGenreRepository jdbcBookGenreRepository;
 
     @Override
