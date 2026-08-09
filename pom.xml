@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hw01-xml-config</module>
+        <module>hw11-spring-webflux</module>
     </modules>
 
     <properties>
