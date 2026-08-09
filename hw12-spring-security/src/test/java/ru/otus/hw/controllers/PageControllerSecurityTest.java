@@ -11,9 +11,9 @@ import ru.otus.hw.config.SecurityConfiguration;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PageControllerTest.class)
+@WebMvcTest(PageController.class)
 @Import(SecurityConfiguration.class)
-class PageControllerTest {
+class PageControllerSecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
