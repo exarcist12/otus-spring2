@@ -26,7 +26,7 @@ create table comments (
                           book_id bigint references books(id) on delete cascade
 );
 
--- Таблица пользователей (Spring Security)
+
 create table users (
                        id bigserial primary key,
                        username varchar(255) not null unique,
@@ -35,10 +35,10 @@ create table users (
                        enabled boolean default true
 );
 
--- Добавляем связь автора с пользователем (один пользователь → один автор)
+
 alter table authors add column user_id bigint unique references users(id);
 
--- Таблицы ACL (для авторизации на уровне доменных сущностей)
+
 create table acl_sid (
                          id bigserial primary key,
                          principal boolean not null,

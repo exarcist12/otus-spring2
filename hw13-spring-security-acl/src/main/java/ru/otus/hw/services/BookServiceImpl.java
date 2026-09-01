@@ -137,17 +137,41 @@ public class BookServiceImpl implements BookService {
     }
 
     private void grantPermissionsForBook(Book book, Authentication auth) {
-        User owner = (User) auth.getPrincipal();
+        // Владелец ACL — это владелец АВТОРА книги, а не тот, кто создаёт
+        User owner = book.getAuthor().getUser();
+
+        if (owner == null) {
+            // Если у автора нет владельца, назначаем права только админу
+            grantAdminOnlyPermissions(book);
+            return;
+        }
+
         ObjectIdentity oid = new ObjectIdentityImpl(Book.class, book.getId());
         Sid ownerSid = new PrincipalSid(owner.getUsername());
         Sid adminSid = new GrantedAuthoritySid("ROLE_ADMIN");
 
         MutableAcl acl = aclService.createAcl(oid);
 
+        // Права для владельца автора: READ, WRITE, DELETE
         acl.insertAce(acl.getEntries().size(), BasePermission.READ, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.DELETE, ownerSid, true);
 
+        // Права для админа: ADMINISTRATION
+        acl.insertAce(acl.getEntries().size(), BasePermission.ADMINISTRATION, adminSid, true);
+
+        aclService.updateAcl(acl);
+    }
+
+    private void grantAdminOnlyPermissions(Book book) {
+        ObjectIdentity oid = new ObjectIdentityImpl(Book.class, book.getId());
+        Sid adminSid = new GrantedAuthoritySid("ROLE_ADMIN");
+
+        MutableAcl acl = aclService.createAcl(oid);
+
+        acl.insertAce(acl.getEntries().size(), BasePermission.READ, adminSid, true);
+        acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, adminSid, true);
+        acl.insertAce(acl.getEntries().size(), BasePermission.DELETE, adminSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.ADMINISTRATION, adminSid, true);
 
         aclService.updateAcl(acl);

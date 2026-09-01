@@ -1,16 +1,25 @@
 spring:
+  shell:
+    interactive:
+      enabled: false
+
   datasource:
-    url: jdbc:h2:mem:maindb
+    url: jdbc:h2:mem:testdb;MODE=LEGACY
     driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    show-sql: false
+    defer-datasource-initialization: true
+
   sql:
     init:
       mode: always
-      data-locations: data.sql
-      schema-locations: schema.sql
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+server:
+  port: 0

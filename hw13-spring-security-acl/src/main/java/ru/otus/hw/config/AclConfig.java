@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 @EnableCaching
 public class AclConfig {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private DataSource dataSource;
 
