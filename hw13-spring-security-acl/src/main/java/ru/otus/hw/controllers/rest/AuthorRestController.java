@@ -3,6 +3,7 @@ package ru.otus.hw.controllers.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.models.User;
 import ru.otus.hw.services.AuthorService;
+import ru.otus.hw.services.CustomUserDetailsService;
 
 import java.util.List;
 
@@ -25,20 +27,30 @@ import java.util.List;
 public class AuthorRestController {
 
     private final AuthorService authorService;
+    private final CustomUserDetailsService userDetailsService;
+
 
     @GetMapping
-    public List<AuthorDto> getAllAuthors() {
-        return authorService.findAll();
+    public List<AuthorDto> getAllAuthors(Authentication authentication) {
+        User user = (User) userDetailsService.loadUserByUsername(authentication.getName());
+        if (user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            return authorService.findAll();
+        } else {
+            return authorService.findByUserId(user.getId());
+        }
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public AuthorDto createAuthor(@RequestBody AuthorDto authorDto) {
         return authorService.insert(authorDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteAuthor(@PathVariable Long id) {
         authorService.deleteById(id);
     }
