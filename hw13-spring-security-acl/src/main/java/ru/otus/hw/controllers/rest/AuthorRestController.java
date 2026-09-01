@@ -27,8 +27,8 @@ import java.util.List;
 public class AuthorRestController {
 
     private final AuthorService authorService;
-    private final CustomUserDetailsService userDetailsService;
 
+    private final CustomUserDetailsService userDetailsService;
 
     @GetMapping
     public List<AuthorDto> getAllAuthors(Authentication authentication) {
