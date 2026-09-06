@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.acls.AclPermissionCacheOptimizer;
 import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
@@ -56,15 +55,6 @@ public class AclConfig {
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
         return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
-
-//    @Bean
-//    public MethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler() {
-//        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-//        AclPermissionEvaluator permissionEvaluator = new AclPermissionEvaluator(aclService());
-//        expressionHandler.setPermissionEvaluator(permissionEvaluator);
-//        expressionHandler.setPermissionCacheOptimizer(new AclPermissionCacheOptimizer(aclService()));
-//        return expressionHandler;
-//    }
 
 
     @Bean

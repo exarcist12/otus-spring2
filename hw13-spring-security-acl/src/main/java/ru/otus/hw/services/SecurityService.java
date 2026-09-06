@@ -22,7 +22,9 @@ import java.util.List;
 public class SecurityService {
 
     private final JdbcAuthorRepository authorRepository;
+
     private final MutableAclService aclService;
+
     public boolean isAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth.getAuthorities().stream()
@@ -39,7 +41,9 @@ public class SecurityService {
 
     public boolean hasReadPermissionOnBook(Long bookId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return false;
+        if (auth == null || !auth.isAuthenticated()) {
+            return false;
+        }
 
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return true;

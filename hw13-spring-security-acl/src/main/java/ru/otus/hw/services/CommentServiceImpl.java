@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
 
     private final JdbcCommentRepository jdbcCommentRepository;
+
     private final JdbcBookRepository jdbcBookRepository;
 
     @Override

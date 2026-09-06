@@ -3,7 +3,6 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,7 +53,6 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDto> findAll() {
         return bookRepository.findAll().stream()
-//                .filter(book -> securityService.hasReadPermissionOnBook(book.getId()))
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -65,9 +63,6 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
 
-//        if (!securityService.hasReadPermissionOnBook(book.getId())) {
-//            throw new AccessDeniedException("Access denied for this book");
-//        }
         return toDto(book);
     }
 
