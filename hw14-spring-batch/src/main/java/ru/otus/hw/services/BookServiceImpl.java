@@ -137,11 +137,9 @@ public class BookServiceImpl implements BookService {
     }
 
     private void grantPermissionsForBook(Book book, Authentication auth) {
-        // Владелец ACL — это владелец АВТОРА книги, а не тот, кто создаёт
         User owner = book.getAuthor().getUser();
 
         if (owner == null) {
-            // Если у автора нет владельца, назначаем права только админу
             grantAdminOnlyPermissions(book);
             return;
         }
@@ -152,12 +150,10 @@ public class BookServiceImpl implements BookService {
 
         MutableAcl acl = aclService.createAcl(oid);
 
-        // Права для владельца автора: READ, WRITE, DELETE
         acl.insertAce(acl.getEntries().size(), BasePermission.READ, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.DELETE, ownerSid, true);
 
-        // Права для админа: ADMINISTRATION
         acl.insertAce(acl.getEntries().size(), BasePermission.ADMINISTRATION, adminSid, true);
 
         aclService.updateAcl(acl);

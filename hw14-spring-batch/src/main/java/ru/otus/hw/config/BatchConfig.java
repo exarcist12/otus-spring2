@@ -48,15 +48,12 @@ public class BatchConfig {
     @Bean
     public ItemProcessor<Book, BookDocument> bookProcessor() {
         return book -> {
-            // Получаем автора
             AuthorDocument authorDoc = new AuthorDocument(book.getAuthor().getFullName());
 
-            // Жанры
             List<GenreDocument> genreDocs = book.getGenres().stream()
                     .map(g -> new GenreDocument(g.getName()))
                     .toList();
 
-            // Комментарии загружаем отдельно через репозиторий
             List<Comment> comments = commentRepository.findByBookId(book.getId());
             List<CommentDocument> commentDocs = comments.stream()
                     .map(c -> new CommentDocument(c.getText()))
