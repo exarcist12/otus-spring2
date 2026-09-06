@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb;MODE=LEGACY
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    defer-datasource-initialization: true
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/library
+      database: library
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+  batch:
+    job:
+      enabled: true  #
+server:
+  port: 8081
