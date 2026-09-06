@@ -2,9 +2,6 @@ spring:
   datasource:
     url: jdbc:h2:mem:maindb;MODE=LEGACY
     driver-class-name: org.h2.Driver
-  shell:
-    interactive:
-      enabled: false
   jpa:
     hibernate:
       ddl-auto: none
@@ -13,19 +10,30 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-
   thymeleaf:
     cache: false
     encoding: UTF-8
     mode: HTML
-
-
   sql:
     init:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/library
+      database: library
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  shell:
+    interactive:
+      enabled: true
 
 server:
   port: 8080

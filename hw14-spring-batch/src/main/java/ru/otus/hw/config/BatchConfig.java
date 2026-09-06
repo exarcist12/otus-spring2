@@ -31,7 +31,9 @@ import java.util.List;
 public class BatchConfig {
 
     private final JobRepository jobRepository;
+
     private final PlatformTransactionManager transactionManager;
+
     private final JdbcCommentRepository commentRepository;
 
     @Bean

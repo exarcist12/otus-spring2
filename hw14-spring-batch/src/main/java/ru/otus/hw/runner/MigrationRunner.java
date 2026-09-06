@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class MigrationRunner implements CommandLineRunner {
 
     private final JobLauncher jobLauncher;
+
     private final Job migrateBooksJob;
 
     @Override
