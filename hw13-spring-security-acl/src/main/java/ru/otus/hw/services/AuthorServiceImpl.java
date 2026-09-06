@@ -1,0 +1,61 @@
+package ru.otus.hw.services;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.User;
+import ru.otus.hw.repositories.JdbcAuthorRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@Service
+public class AuthorServiceImpl implements AuthorService {
+    private final JdbcAuthorRepository jdbcAuthorRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AuthorDto> findAll() {
+        return jdbcAuthorRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public AuthorDto insert(AuthorDto authorDto) {
+        Author author = new Author();
+        author.setFullName(authorDto.getFullName());
+        Author saved = jdbcAuthorRepository.save(author);
+        return toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        jdbcAuthorRepository.deleteById(id);
+    }
+
+    @Override
+    public List<AuthorDto> findByUserId(Long userId) {
+        Author author = jdbcAuthorRepository.findByUserId(userId);
+        if (author == null) {
+            throw new EntityNotFoundException("Author not found for user with id: " + userId);
+        }
+        return List.of(toDto(author));
+    }
+
+    private AuthorDto toDto(Author author) {
+        return new AuthorDto(author.getId(), author.getFullName());
+    }
+
+    @Override
+    public boolean isAuthorBelongsToUser(Long authorId, User user) {
+        Author author = jdbcAuthorRepository.findById(authorId).orElse(null);
+        return author != null && author.getUser() != null && author.getUser().getId().equals(user.getId());
+    }
+}

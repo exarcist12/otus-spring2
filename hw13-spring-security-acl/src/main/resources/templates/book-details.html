@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр книги</title>
+    <style>
+        body { padding: 50px; font-family: Arial, sans-serif; }
+        .details { border: 1px solid #ccc; padding: 20px; }
+        .comments { margin-top: 20px; }
+        .comments li { list-style: none; border-bottom: 1px dashed #ccc; padding: 5px; }
+        .add-comment { margin-top: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .add-comment textarea { width: 100%; max-width: 400px; }
+        .btn { padding: 5px 15px; border: none; border-radius: 3px; background: #2196F3; color: white; cursor: pointer; }
+        .btn:hover { background: #1976D2; }
+        a.btn { background: #aaa; text-decoration: none; }
+        a.btn:hover { background: #888; }
+    </style>
+</head>
+<body>
+<div id="bookDetails">
+    <h3 id="bookTitle"></h3>
+    <p><strong>Автор:</strong> <span id="bookAuthor"></span></p>
+    <p><strong>Жанры:</strong> <span id="bookGenres"></span></p>
+</div>
+
+<div class="comments">
+    <h4>Комментарии</h4>
+    <ul id="commentsList"></ul>
+</div>
+
+<div class="add-comment">
+    <h4>Добавить комментарий</h4>
+    <textarea id="commentText" rows="3" cols="50" placeholder="Ваш комментарий..."></textarea>
+    <br/>
+    <button onclick="addComment()" class="btn">Отправить</button>
+</div>
+
+<br/>
+<a href="/books" class="btn">Назад</a>
+
+<script>
+    const path = window.location.pathname;
+    const bookId = path.split('/')[2];
+
+    if (bookId) {
+        // Загружаем книгу
+        fetch(`/api/books/${bookId}`)
+            .then(r => r.json())
+            .then(book => {
+                document.getElementById('bookTitle').textContent = book.title;
+                document.getElementById('bookAuthor').textContent = book.authorName;
+                document.getElementById('bookGenres').textContent = book.genres.map(g => g.name).join(', ');
+            })
+            .catch(err => console.error('Ошибка загрузки книги:', err));
+
+        // Загружаем комментарии
+        loadComments();
+    }
+
+    function loadComments() {
+        fetch(`/api/books/${bookId}/comments`)
+            .then(r => r.json())
+            .then(comments => {
+                const ul = document.getElementById('commentsList');
+                ul.innerHTML = '';
+                if (comments.length === 0) {
+                    ul.innerHTML = '<li>Комментариев пока нет.</li>';
+                } else {
+                    comments.forEach(c => {
+                        const li = document.createElement('li');
+                        li.textContent = c.text;
+                        ul.appendChild(li);
+                    });
+                }
+            })
+            .catch(err => console.error('Ошибка загрузки комментариев:', err));
+    }
+
+    function addComment() {
+        const text = document.getElementById('commentText').value;
+        if (!text.trim()) {
+            alert('Введите текст комментария');
+            return;
+        }
+
+        fetch(`/api/books/${bookId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP error ' + response.status);
+                return response.json();
+            })
+            .then(() => {
+                document.getElementById('commentText').value = '';
+                loadComments(); // обновляем список
+            })
+            .catch(err => console.error('Ошибка добавления комментария:', err));
+    }
+</script>
+</body>
+</html>
