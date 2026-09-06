@@ -21,6 +21,7 @@
         .btn-save { background-color: #2196F3; color: white; }
         .btn-delete { background-color: #f44336; color: white; }
         form { display: inline-block; margin: 0; padding: 0; }
+        .admin-only { display: none; }
     </style>
 </head>
 <body>
@@ -38,12 +39,11 @@
     </tr>
     </thead>
     <tbody id="booksBody">
-
     </tbody>
 </table>
 
 <br/>
-<p>
+<p id="adminLinks" style="display:none;">
     <a href="/authors">Авторы</a> |
     <a href="/genres">Жанры</a>
 </p>
@@ -53,7 +53,31 @@
     let genres = [];
     let isAdmin = false;
 
+    function loadRole() {
+        fetch('/api/auth/role')
+            .then(r => r.text())
+            .then(role => {
+                isAdmin = (role === 'ROLE_ADMIN');
+                console.log('Role:', role, 'isAdmin:', isAdmin);
+                if (isAdmin) {
+                    document.getElementById('adminLinks').style.display = 'block';
+                    Promise.all([
+                        fetch('/api/authors/current').then(r => r.json()),
+                        fetch('/api/genres').then(r => r.json())
+                    ]).then(([authorsData, genresData]) => {
+                        authors = authorsData;
+                        genres = genresData;
+                        loadBooks();
+                    }).catch(err => console.error('Error loading admin data:', err));
+                } else {
+                    loadBooks();
+                }
+            })
+            .catch(err => console.error('Error loading role:', err));
+    }
+
     function createAddRow() {
+        if (!isAdmin) return null;
         const row = document.createElement('tr');
         row.id = 'add-row';
         row.innerHTML = `
@@ -72,33 +96,6 @@
         return row;
     }
 
-    function loadSelects() {
-        console.log('Loading selects...');
-
-        fetch('/api/authors/current')
-            .then(r => {
-                if (r.status === 403 || r.status === 401) {
-                    // Не авторизован
-                    throw new Error('Not authenticated');
-                }
-                return r.json();
-            })
-            .then(currentAuthors => {
-                return Promise.all([
-                    fetch('/api/authors/current').then(r => r.json()),
-                    fetch('/api/genres').then(r => r.json())
-                ]);
-            })
-            .then(([authorsData, genresData]) => {
-                authors = authorsData;
-                genres = genresData;
-                console.log('Authors loaded:', authors);
-                console.log('Genres loaded:', genres);
-                loadBooks();
-            })
-            .catch(err => console.error('Error loading selects:', err));
-    }
-
     function loadBooks() {
         console.log('Loading books...');
         fetch('/api/books')
@@ -111,60 +108,73 @@
                 const tbody = document.getElementById('booksBody');
                 tbody.innerHTML = '';
 
-                const addRow = createAddRow();
-                tbody.appendChild(addRow);
-
-                const authorSelect = document.getElementById('newAuthorId');
-                if (authorSelect) {
-                    authorSelect.innerHTML = '';
-                    authors.forEach(a => {
-                        const opt = document.createElement('option');
-                        opt.value = a.id;
-                        opt.textContent = a.fullName;
-                        authorSelect.appendChild(opt);
-                    });
-                }
-
-                const genreSelect = document.getElementById('newGenreIds');
-                if (genreSelect) {
-                    genreSelect.innerHTML = '';
-                    genres.forEach(g => {
-                        const opt = document.createElement('option');
-                        opt.value = g.id;
-                        opt.textContent = g.name;
-                        genreSelect.appendChild(opt);
-                    });
+                if (isAdmin) {
+                    const addRow = createAddRow();
+                    if (addRow) tbody.appendChild(addRow);
+                    const authorSelect = document.getElementById('newAuthorId');
+                    if (authorSelect) {
+                        authorSelect.innerHTML = '';
+                        authors.forEach(a => {
+                            const opt = document.createElement('option');
+                            opt.value = a.id;
+                            opt.textContent = a.fullName;
+                            authorSelect.appendChild(opt);
+                        });
+                    }
+                    const genreSelect = document.getElementById('newGenreIds');
+                    if (genreSelect) {
+                        genreSelect.innerHTML = '';
+                        genres.forEach(g => {
+                            const opt = document.createElement('option');
+                            opt.value = g.id;
+                            opt.textContent = g.name;
+                            genreSelect.appendChild(opt);
+                        });
+                    }
                 }
 
                 books.forEach(book => {
                     const row = document.createElement('tr');
                     row.id = `book-row-${book.id}`;
-                    row.innerHTML = `
-                        <td>${book.id}</td>
-                        <td><input type="text" id="title-${book.id}" value="${book.title}" /></td>
-                        <td>
-                            <select id="author-${book.id}">
-                                ${authors.map(a => `<option value="${a.id}" ${a.id === book.authorId ? 'selected' : ''}>${a.fullName}</option>`).join('')}
-                            </select>
-                        </td>
-                        <td>
-                            <select id="genres-${book.id}" multiple>
-                                ${genres.map(g => `<option value="${g.id}" ${book.genres.some(bg => bg.id === g.id) ? 'selected' : ''}>${g.name}</option>`).join('')}
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-save" onclick="updateBook(${book.id})">Сохранить</button>
-                            <button class="btn btn-delete" onclick="deleteBook(${book.id})">Удалить</button>
-                        </td>
-                    `;
+                    if (isAdmin) {
+                        row.innerHTML = `
+                            <td>${book.id}</td>
+                            <td><input type="text" id="title-${book.id}" value="${book.title}" /></td>
+                            <td>
+                                <select id="author-${book.id}">
+                                    ${authors.map(a => `<option value="${a.id}" ${a.id === book.authorId ? 'selected' : ''}>${a.fullName}</option>`).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <select id="genres-${book.id}" multiple>
+                                    ${genres.map(g => `<option value="${g.id}" ${book.genres.some(bg => bg.id === g.id) ? 'selected' : ''}>${g.name}</option>`).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <a href="/books/${book.id}" class="btn-view">Просмотр</a>
+                                <button class="btn btn-save" onclick="updateBook(${book.id})">Сохранить</button>
+                                <button class="btn btn-delete" onclick="deleteBook(${book.id})">Удалить</button>
+                            </td>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <td>${book.id}</td>
+                            <td>${book.title}</td>
+                            <td>${book.authorName}</td>
+                            <td>${book.genres.map(g => g.name).join(', ')}</td>
+                            <td>
+                                <a href="/books/${book.id}" class="btn-view">Просмотр</a>
+                            </td>
+                        `;
+                    }
                     tbody.appendChild(row);
                 });
             })
             .catch(err => console.error('Error loading books:', err));
     }
 
-
     function createBook() {
+        if (!isAdmin) return;
         const title = document.getElementById('newTitle').value;
         const authorId = parseInt(document.getElementById('newAuthorId').value);
         const genreSelect = document.getElementById('newGenreIds');
@@ -187,6 +197,7 @@
     }
 
     function updateBook(id) {
+        if (!isAdmin) return;
         const title = document.getElementById(`title-${id}`).value;
         const authorId = parseInt(document.getElementById(`author-${id}`).value);
         const genreSelect = document.getElementById(`genres-${id}`);
@@ -208,6 +219,7 @@
     }
 
     function deleteBook(id) {
+        if (!isAdmin) return;
         if (!confirm('Удалить книгу?')) return;
         console.log('Deleting book:', id);
         fetch(`/api/books/${id}`, { method: 'DELETE' })
@@ -218,7 +230,8 @@
             .catch(err => console.error('Error deleting book:', err));
     }
 
-    loadSelects();
+    // Запуск
+    loadRole();
 </script>
 
 </body>

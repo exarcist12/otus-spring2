@@ -54,15 +54,28 @@ public class AclConfig {
 
     @Bean
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
-        return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_EDITOR"));
+        return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
+
+//    @Bean
+//    public MethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler() {
+//        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+//        AclPermissionEvaluator permissionEvaluator = new AclPermissionEvaluator(aclService());
+//        expressionHandler.setPermissionEvaluator(permissionEvaluator);
+//        expressionHandler.setPermissionCacheOptimizer(new AclPermissionCacheOptimizer(aclService()));
+//        return expressionHandler;
+//    }
+
 
     @Bean
     public MethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler() {
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+
         AclPermissionEvaluator permissionEvaluator = new AclPermissionEvaluator(aclService());
         expressionHandler.setPermissionEvaluator(permissionEvaluator);
-        expressionHandler.setPermissionCacheOptimizer(new AclPermissionCacheOptimizer(aclService()));
+
+        expressionHandler.setPermissionCacheOptimizer(null);
+
         return expressionHandler;
     }
 

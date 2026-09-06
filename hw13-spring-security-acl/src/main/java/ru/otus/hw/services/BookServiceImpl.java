@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -14,8 +16,6 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookCreateDto;
@@ -47,37 +47,36 @@ public class BookServiceImpl implements BookService {
 
     private final MutableAclService aclService;
 
+    private final SecurityService securityService;
+
+
+    @PostFilter("@securityService.hasReadPermissionOnBook(filterObject.id)")
     @Override
     public List<BookDto> findAll() {
         return bookRepository.findAll().stream()
-                .filter(this::hasReadPermission)
+//                .filter(book -> securityService.hasReadPermissionOnBook(book.getId()))
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
+    @PostAuthorize("@securityService.hasReadPermissionOnBook(returnObject.id)")
     @Override
     public BookDto findById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        if (!hasReadPermission(book)) {
-            throw new AccessDeniedException("No READ permission for this book");
-        }
+
+//        if (!securityService.hasReadPermissionOnBook(book.getId())) {
+//            throw new AccessDeniedException("Access denied for this book");
+//        }
         return toDto(book);
     }
 
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     public BookDto insert(BookCreateDto createDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) auth.getPrincipal();
         Author author = authorRepository.findById(createDto.getAuthorId())
                 .orElseThrow(() -> new EntityNotFoundException("Author not found"));
-        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin) {
-            if (author.getUser() == null || !author.getUser().getId().equals(currentUser.getId())) {
-                throw new AccessDeniedException("You can't create book for this author");
-            }
-        }
+
         List<Genre> genres = new ArrayList<>();
         if (createDto.getGenreIds() != null) {
             for (Long genreId : createDto.getGenreIds()) {
@@ -86,16 +85,18 @@ public class BookServiceImpl implements BookService {
                 genres.add(genre);
             }
         }
+
         Book book = new Book();
         book.setTitle(createDto.getTitle());
         book.setAuthor(author);
         book.setGenres(genres);
+
         Book saved = bookRepository.save(book);
-        grantPermissionsForBook(saved, auth);
+        grantPermissionsForBook(saved);
         return toDto(saved);
     }
 
-    @PreAuthorize("hasPermission(#id, 'ru.otus.hw.models.Book', 'WRITE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     public BookDto update(long id, BookUpdateDto updateDto) {
         Book book = bookRepository.findById(id)
@@ -122,7 +123,7 @@ public class BookServiceImpl implements BookService {
         return toDto(bookRepository.save(book));
     }
 
-    @PreAuthorize("hasPermission(#id, 'ru.otus.hw.models.Book', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     public void deleteById(long id) {
 
@@ -136,12 +137,10 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    private void grantPermissionsForBook(Book book, Authentication auth) {
-        // Владелец ACL — это владелец АВТОРА книги, а не тот, кто создаёт
+    private void grantPermissionsForBook(Book book) {
         User owner = book.getAuthor().getUser();
 
         if (owner == null) {
-            // Если у автора нет владельца, назначаем права только админу
             grantAdminOnlyPermissions(book);
             return;
         }
@@ -152,12 +151,10 @@ public class BookServiceImpl implements BookService {
 
         MutableAcl acl = aclService.createAcl(oid);
 
-        // Права для владельца автора: READ, WRITE, DELETE
         acl.insertAce(acl.getEntries().size(), BasePermission.READ, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.DELETE, ownerSid, true);
 
-        // Права для админа: ADMINISTRATION
         acl.insertAce(acl.getEntries().size(), BasePermission.ADMINISTRATION, adminSid, true);
 
         aclService.updateAcl(acl);
@@ -177,31 +174,6 @@ public class BookServiceImpl implements BookService {
         aclService.updateAcl(acl);
     }
 
-    private boolean hasReadPermission(Book book) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getPrincipal() == null) {
-            return false;
-        }
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (isAdmin) {
-            return true;
-        }
-        try {
-            ObjectIdentity oid = new ObjectIdentityImpl(Book.class, book.getId());
-            MutableAcl acl = (MutableAcl) aclService.readAclById(oid);
-
-            List<Sid> sids = new ArrayList<>();
-            if (auth.getPrincipal() instanceof User user) {
-                sids.add(new PrincipalSid(user.getUsername()));
-            }
-            return acl.isGranted(List.of(BasePermission.READ), sids, false);
-        } catch (NotFoundException e) {
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
 
     private BookDto toDto(Book book) {

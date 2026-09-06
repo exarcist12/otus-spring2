@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
+import ru.otus.hw.models.User;
 import ru.otus.hw.repositories.JdbcAuthorRepository;
 
 import java.util.List;
@@ -50,5 +51,11 @@ public class AuthorServiceImpl implements AuthorService {
 
     private AuthorDto toDto(Author author) {
         return new AuthorDto(author.getId(), author.getFullName());
+    }
+
+    @Override
+    public boolean isAuthorBelongsToUser(Long authorId, User user) {
+        Author author = jdbcAuthorRepository.findById(authorId).orElse(null);
+        return author != null && author.getUser() != null && author.getUser().getId().equals(user.getId());
     }
 }
