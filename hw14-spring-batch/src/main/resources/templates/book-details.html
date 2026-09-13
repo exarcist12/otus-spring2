@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр книги</title>
+    <style>
+        body { padding: 50px; }
+        .details { border: 1px solid #ccc; padding: 20px; }
+        .comments { margin-top: 20px; }
+        .comments li { list-style: none; border-bottom: 1px dashed #ccc; padding: 5px; }
+    </style>
+</head>
+<body>
+<div id="bookDetails">
+    <h3 id="bookTitle"></h3>
+    <p><strong>Автор:</strong> <span id="bookAuthor"></span></p>
+    <p><strong>Жанры:</strong> <span id="bookGenres"></span></p>
+</div>
+<div class="comments">
+    <h4>Комментарии</h4>
+    <ul id="commentsList"></ul>
+</div>
+<a href="/books">Назад</a>
+
+<script>
+    const path = window.location.pathname;
+    const bookId = path.split('/')[2];
+
+    if (bookId) {
+        fetch(`/api/books/${bookId}`)
+            .then(r => r.json())
+            .then(book => {
+                document.getElementById('bookTitle').textContent = book.title;
+                document.getElementById('bookAuthor').textContent = book.authorName;
+                document.getElementById('bookGenres').textContent = book.genres.map(g => g.name).join(', ');
+            });
+        fetch(`/api/books/${bookId}/comments`)
+            .then(r => r.json())
+            .then(comments => {
+                const ul = document.getElementById('commentsList');
+                ul.innerHTML = '';
+                if (comments.length === 0) {
+                    ul.innerHTML = '<li>Комментариев пока нет.</li>';
+                } else {
+                    comments.forEach(c => {
+                        const li = document.createElement('li');
+                        li.textContent = c.text;
+                        ul.appendChild(li);
+                    });
+                }
+            });
+    }
+</script>
+</body>
+</html>
