@@ -15,6 +15,7 @@
         <module>hw10-spring-mvc-ajax-fetch</module>
         <module>hw13-spring-security-acl</module>
         <module>hw14-spring-batch</module>
+        <module>hw16-spring-boot-actuator</module>
     </modules>
 
     <properties>
