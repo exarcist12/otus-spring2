@@ -15,7 +15,7 @@ public class MigrationCommands {
 
     private final JobLauncher jobLauncher;
 
-    private final Job migrateBooksJob;
+    private final Job migrateLibraryJob;
 
     @ShellMethod(key = "migrate", value = "Запустить миграцию книг из H2 в MongoDB")
     public String runMigration() {
@@ -26,7 +26,7 @@ public class MigrationCommands {
                     .addLong("time", System.currentTimeMillis())
                     .toJobParameters();
 
-            JobExecution execution = jobLauncher.run(migrateBooksJob, jobParameters);
+            JobExecution execution = jobLauncher.run(migrateLibraryJob, jobParameters);
 
             return "Миграция завершена со статусом: " + execution.getStatus();
         } catch (Exception e) {

@@ -19,16 +19,14 @@ public class BookDocument {
 
     private String title;
 
-    private AuthorDocument author;
+    private String authorId;
 
-    private List<GenreDocument> genres = new ArrayList<>();
+    private List<String> genreIds = new ArrayList<>();
 
-    private List<CommentDocument> comments = new ArrayList<>();
 
-    public BookDocument(String title, AuthorDocument author, List<GenreDocument> genres, List<CommentDocument> comments) {
+    public BookDocument(String title, String authorId, List<String> genreIds) {
         this.title = title;
-        this.author = author;
-        this.genres = genres != null ? genres : new ArrayList<>();
-        this.comments = comments != null ? comments : new ArrayList<>();
+        this.authorId = authorId;
+        this.genreIds = genreIds != null ? genreIds : new ArrayList<>();
     }
 }
