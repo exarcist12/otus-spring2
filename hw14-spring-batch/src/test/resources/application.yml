@@ -1,25 +1,42 @@
 spring:
-  shell:
-    interactive:
-      enabled: false
-
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=LEGACY
+    url: jdbc:h2:mem:maindb;MODE=LEGACY
     driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: true
     defer-datasource-initialization: true
-
+    properties:
+      hibernate:
+        format_sql: true
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
   sql:
     init:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/library
+      database: library
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  shell:
+    interactive:
+      enabled: false
+
 server:
-  port: 0
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false

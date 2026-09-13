@@ -1,24 +1,29 @@
--- Пользователи (пароль: password)
-INSERT INTO users (username, password, role, enabled) VALUES ('admin', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_ADMIN', TRUE);
-INSERT INTO users (username, password, role, enabled) VALUES ('user1', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_USER', TRUE);
-INSERT INTO users (username, password, role, enabled) VALUES ('user2', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_USER', TRUE);
+insert into authors(full_name)
+values ('Author_1'), ('Author_2'), ('Author_3');
 
--- Авторы с привязкой к пользователям
-INSERT INTO authors (full_name, user_id) VALUES ('Author_1', 2);
-INSERT INTO authors (full_name, user_id) VALUES ('Author_2', 3);
-INSERT INTO authors (full_name, user_id) VALUES ('Author_3', 2);
+insert into genres(name)
+values ('Genre_1'), ('Genre_2'), ('Genre_3');
 
--- Жанры
-INSERT INTO genres (name) VALUES ('Genre_1');
-INSERT INTO genres (name) VALUES ('Genre_2');
-INSERT INTO genres (name) VALUES ('Genre_3');
+insert into books(title, author_id)
+values ('BookTitle_1', 1), ('BookTitle_2', 2), ('BookTitle_3', 3);
 
--- Книги
-INSERT INTO books (title, author_id) VALUES ('BookTitle_1', 1);
-INSERT INTO books (title, author_id) VALUES ('BookTitle_2', 2);
-INSERT INTO books (title, author_id) VALUES ('BookTitle_3', 3);
+insert into books_genres(book_id, genre_id)
+values (1, 1), (2, 2), (3, 3);
 
--- Связь книг с жанрами
-INSERT INTO books_genres (book_id, genre_id) VALUES (1, 1);
-INSERT INTO books_genres (book_id, genre_id) VALUES (2, 2);
-INSERT INTO books_genres (book_id, genre_id) VALUES (3, 3);
+insert into comments(text, book_id)
+values
+    ('Отличная книга! Очень понравилась', 1),
+    ('Хороший сюжет, рекомендую', 1),
+    ('Неплохо, но могло быть лучше', 2),
+    ('Скучновато', 2),
+    ('Шедевр!', 3);
+
+
+insert into users (username, password, role, enabled)
+values
+    ('admin', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_ADMIN', true),
+    ('user1', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_USER', true),
+    ('user2', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ROLE_USER', true);
+
+update authors set user_id = 2 where id = 1;
+update authors set user_id = 3 where id = 2;
