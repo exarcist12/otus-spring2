@@ -14,10 +14,10 @@ public class IntegrationConfig {
         return MessageChannels.queue(10);
     }
 
-//    @Bean
-//    public MessageChannelSpec<?, ?> deliveredLettersChannel() {
-//        return MessageChannels.publishSubscribe();
-//    }
+    @Bean
+    public MessageChannelSpec<?, ?> deliveredLettersChannel() {
+        return MessageChannels.publishSubscribe();
+    }
 
     @Bean(name = PollerMetadata.DEFAULT_POLLER)
     public PollerSpec poller() {
@@ -26,13 +26,11 @@ public class IntegrationConfig {
     }
 
     @Bean
-    public IntegrationFlow postFlow(
-            PostOfficeService postOfficeService
-    ) {
+    public IntegrationFlow postFlow(PostOfficeService postOfficeService) {
         return IntegrationFlow
                 .from(lettersChannel())
                 .handle(postOfficeService, "prepareLetter")
-    //            .channel(deliveredLettersChannel())
+                .channel(deliveredLettersChannel())
                 .get();
     }
 }
