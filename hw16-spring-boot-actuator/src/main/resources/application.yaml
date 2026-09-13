@@ -24,6 +24,8 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/library
       database: library
+    rest:
+      base-path: /data
 
   batch:
     job:
