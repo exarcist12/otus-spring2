@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Форма книги</title>
+    <style>
+        body { padding: 50px; }
+        .field { margin: 10px 0; }
+        label { display: inline-block; width: 100px; }
+        select, input { width: 250px; }
+        .btn { padding: 5px 15px; }
+    </style>
+</head>
+<body>
+<h1 id="formTitle">Создать книгу</h1>
+<form id="bookForm">
+    <input type="hidden" id="bookId" />
+    <div class="field">
+        <label for="title">Название:</label>
+        <input type="text" id="title" required />
+    </div>
+    <div class="field">
+        <label for="authorId">Автор:</label>
+        <select id="authorId"></select>
+    </div>
+    <div class="field">
+        <label for="genreIds">Жанры:</label>
+        <select id="genreIds" multiple></select>
+    </div>
+    <button type="submit" class="btn">Сохранить</button>
+    <a href="/books">Отмена</a>
+</form>
+<script>
+    const path = window.location.pathname;
+    const isEdit = path.includes('/edit');
+    const bookId = isEdit ? path.split('/')[2] : null;
+
+    function loadSelects() {
+        Promise.all([
+            fetch('/api/authors').then(r => r.json()),
+            fetch('/api/genres').then(r => r.json())
+        ]).then(([authors, genres]) => {
+            const authorSelect = document.getElementById('authorId');
+            authorSelect.innerHTML = '';
+            authors.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.id;
+                opt.textContent = a.fullName;
+                authorSelect.appendChild(opt);
+            });
+
+            const genreSelect = document.getElementById('genreIds');
+            genreSelect.innerHTML = '';
+            genres.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g.id;
+                opt.textContent = g.name;
+                genreSelect.appendChild(opt);
+            });
+
+            if (isEdit && bookId) {
+                fetch(`/api/books/${bookId}`)
+                    .then(r => r.json())
+                    .then(book => {
+                        document.getElementById('formTitle').textContent = 'Редактировать книгу';
+                        document.getElementById('bookId').value = book.id;
+                        document.getElementById('title').value = book.title;
+                        document.getElementById('authorId').value = book.authorId;
+                        const selectedGenres = book.genres.map(g => g.id);
+                        Array.from(genreSelect.options).forEach(opt => {
+                            opt.selected = selectedGenres.includes(Number(opt.value));
+                        });
+                    });
+            }
+        });
+    }
+
+    document.getElementById('bookForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('bookId').value;
+        const title = document.getElementById('title').value;
+        const authorId = document.getElementById('authorId').value;
+        const genreSelect = document.getElementById('genreIds');
+        const genreIds = Array.from(genreSelect.selectedOptions).map(opt => Number(opt.value));
+
+        const payload = { title, authorId: Number(authorId), genreIds };
+        const url = id ? `/api/books/${id}` : '/api/books';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            window.location.href = '/books';
+        });
+    });
+
+    loadSelects();
+</script>
+</body>
+</html>

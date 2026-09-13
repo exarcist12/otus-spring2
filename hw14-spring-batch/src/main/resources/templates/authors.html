@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Авторы</title>
+    <style>
+        body { padding: 50px; }
+        table { border-collapse: collapse; width: 500px; }
+        th, td { border: 1px solid steelblue; padding: 5px; text-align: left; }
+        .btn { padding: 3px 8px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-add { background: #4CAF50; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+<h3>Авторы</h3>
+
+<table>
+    <thead>
+    <tr><th>ID</th><th>Имя</th><th>Действие</th></tr>
+    </thead>
+    <tbody id="authorsBody">
+    </tbody>
+</table>
+
+<br/>
+<a href="/books">На главную</a>
+
+<script>
+    function createAddRow() {
+        const row = document.createElement('tr');
+        row.id = 'add-author-row';
+        row.innerHTML = `
+            <td></td>
+            <td><input type="text" id="newAuthorName" placeholder="Имя автора" /></td>
+            <td><button class="btn btn-add" onclick="createAuthor()">Добавить</button></td>
+        `;
+        return row;
+    }
+
+    function loadAuthors() {
+        fetch('/api/authors')
+            .then(response => response.json())
+            .then(authors => {
+                const tbody = document.getElementById('authorsBody');
+                tbody.innerHTML = '';
+                // строка добавления
+                tbody.appendChild(createAddRow());
+                // строки с авторами
+                authors.forEach(author => {
+                    const row = document.createElement('tr');
+                    row.id = `author-row-${author.id}`;
+                    row.innerHTML = `
+                        <td>${author.id}</td>
+                        <td>${author.fullName}</td>
+                        <td>
+                            <button class="btn btn-delete" onclick="deleteAuthor(${author.id})">Удалить</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+    }
+
+    function createAuthor() {
+        const name = document.getElementById('newAuthorName').value;
+        if (!name.trim()) return alert('Введите имя');
+        fetch('/api/authors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName: name })
+        }).then(() => {
+            document.getElementById('newAuthorName').value = '';
+            loadAuthors();
+        });
+    }
+
+    function deleteAuthor(id) {
+        if (!confirm('Удалить автора?')) return;
+        fetch(`/api/authors/${id}`, { method: 'DELETE' })
+            .then(() => loadAuthors());
+    }
+
+    loadAuthors();
+</script>
+</body>
+</html>
