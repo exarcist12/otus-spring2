@@ -1345,3 +1345,8 @@ org.springframework.web.servlet.resource.NoResourceFoundException: No static res
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.48.jar:10.1.48]
 	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
 
+2026-09-27T12:05:22.722+04:00  INFO 908 --- [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-27T12:05:22.727+04:00  INFO 908 --- [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-09-27T12:05:22.736+04:00  INFO 908 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-27T12:05:22.737+04:00  INFO 908 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-09-27T12:05:22.739+04:00  INFO 908 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

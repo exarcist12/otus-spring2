@@ -11,6 +11,7 @@
     <modules>
         <module>hw01-xml-config</module>
         <module>hw16-spring-boot-actuator-2</module>
+        <module>hw17-docker</module>
     </modules>
 
     <properties>
