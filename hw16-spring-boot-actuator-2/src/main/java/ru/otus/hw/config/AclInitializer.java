@@ -39,48 +39,62 @@ public class AclInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         log.info("========== AclInitializer STARTED ==========");
-
-        Authentication systemAuth = new AnonymousAuthenticationToken(
-                "system",
-                "system",
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-        );
+        Authentication systemAuth = createSystemAuth();
         SecurityContextHolder.getContext().setAuthentication(systemAuth);
 
         try {
             List<Book> books = bookRepository.findAll();
             log.info("AclInitializer: found {} books", books.size());
-
-            for (Book book : books) {
-                ObjectIdentity oid = new ObjectIdentityImpl(Book.class, book.getId());
-
-                try {
-                    aclService.readAclById(oid);
-                    log.info("AclInitializer: ACL exists for book id={}", book.getId());
-                    continue;
-                } catch (NotFoundException e) {
-                    createAclForBook(book);
-                } catch (Exception ex) {
-                    log.error("AclInitializer: error for book id={}", book.getId(), ex);
-                }
-            }
-
+            processBooks(books);
             log.info("========== AclInitializer FINISHED ==========");
         } finally {
-
             SecurityContextHolder.clearContext();
+        }
+    }
+
+    private Authentication createSystemAuth() {
+        return new AnonymousAuthenticationToken(
+                "system",
+                "system",
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+        );
+    }
+
+    private void processBooks(List<Book> books) {
+        for (Book book : books) {
+            try {
+                ObjectIdentity oid = new ObjectIdentityImpl(Book.class, book.getId());
+                if (aclExists(oid)) {
+                    log.info("AclInitializer: ACL exists for book id={}", book.getId());
+                    continue;
+                }
+                createAclForBook(book);
+            } catch (Exception ex) {
+                log.error("AclInitializer: error for book id={}", book.getId(), ex);
+            }
+        }
+    }
+
+    private boolean aclExists(ObjectIdentity oid) {
+        try {
+            aclService.readAclById(oid);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
         }
     }
 
     private void createAclForBook(Book book) {
         log.info("AclInitializer: creating ACL for book id={}", book.getId());
-
         if (book.getAuthor() == null || book.getAuthor().getUser() == null) {
             log.warn("AclInitializer: no owner for book id={}, granting admin only", book.getId());
             grantAdminOnlyPermissions(book);
             return;
         }
+        grantOwnerAndAdminPermissions(book);
+    }
 
+    private void grantOwnerAndAdminPermissions(Book book) {
         String ownerUsername = book.getAuthor().getUser().getUsername();
         log.info("AclInitializer: owner='{}' for book id={}", ownerUsername, book.getId());
 
@@ -89,12 +103,10 @@ public class AclInitializer implements CommandLineRunner {
         Sid adminSid = new GrantedAuthoritySid("ROLE_ADMIN");
 
         MutableAcl acl = aclService.createAcl(oid);
-
         acl.insertAce(acl.getEntries().size(), BasePermission.READ, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.DELETE, ownerSid, true);
         acl.insertAce(acl.getEntries().size(), BasePermission.ADMINISTRATION, adminSid, true);
-
         aclService.updateAcl(acl);
         log.info("AclInitializer: ACL created for book id={}", book.getId());
     }

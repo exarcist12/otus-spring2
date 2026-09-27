@@ -32,6 +32,7 @@ import ru.otus.hw.repositories.JdbcGenreRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,30 +70,45 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDto insert(BookCreateDto createDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) auth.getPrincipal();
         Author author = authorRepository.findById(createDto.getAuthorId())
                 .orElseThrow(() -> new EntityNotFoundException("Author not found"));
-        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin) {
-            if (author.getUser() == null || !author.getUser().getId().equals(currentUser.getId())) {
-                throw new AccessDeniedException("You can't create book for this author");
-            }
-        }
-        List<Genre> genres = new ArrayList<>();
-        if (createDto.getGenreIds() != null) {
-            for (Long genreId : createDto.getGenreIds()) {
-                Genre genre = genreRepository.findById(genreId)
-                        .orElseThrow(() -> new EntityNotFoundException("Genre not found: " + genreId));
-                genres.add(genre);
-            }
-        }
+
+        checkAuthorPermission(author, auth);
+        List<Genre> genres = loadGenres(createDto.getGenreIds());
+
         Book book = new Book();
         book.setTitle(createDto.getTitle());
         book.setAuthor(author);
         book.setGenres(genres);
+
         Book saved = bookRepository.save(book);
         grantPermissionsForBook(saved, auth);
         return toDto(saved);
+    }
+
+    private void checkAuthorPermission(Author author, Authentication auth) {
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            return;
+        }
+        User currentUser = (User) auth.getPrincipal();
+        if (author.getUser() == null || !author.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You can't create book for this author");
+        }
+    }
+
+    private List<Genre> loadGenres(Set<Long> genreIds) {
+        List<Genre> genres = new ArrayList<>();
+        if (genreIds == null) {
+            return genres;
+        }
+        for (Long genreId : genreIds) {
+            Genre genre = genreRepository.findById(genreId)
+                    .orElseThrow(() -> new EntityNotFoundException("Genre not found: " + genreId));
+            genres.add(genre);
+        }
+        return genres;
     }
 
     @PreAuthorize("hasPermission(#id, 'ru.otus.hw.models.Book', 'WRITE')")
