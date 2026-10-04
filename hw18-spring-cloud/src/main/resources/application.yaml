@@ -1,0 +1,87 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/library}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/library?serverSelectionTimeoutMS=2000}
+      database: library
+    rest:
+      base-path: /data
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  shell:
+    interactive:
+      enabled: true
+
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, logfile, env, beans, mappings
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Library Application
+    description: Spring Boot Library with Actuator
+    version: 1.0.0
+
+logging:
+  level:
+    root: INFO
+    ru.otus.hw: DEBUG
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      mongoMigration:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      mongoMigration:
+        maxAttempts: 2
+        waitDuration: 1s
