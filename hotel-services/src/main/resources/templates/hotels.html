@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отели</title>
+    <style>
+        body { padding: 50px; font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 700px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        .btn { padding: 5px 15px; cursor: pointer; }
+        .header { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Отели</h1>
+    <span id="userInfo"></span>
+    <button class="btn" onclick="logout()">Выйти</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Звёзды</th>
+        <th>Город</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody id="hotelsBody"></tbody>
+</table>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        window.location.href = '/ui/login';
+    }
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('userInfo').textContent = `${user.username} (${user.role})`;
+
+    fetch('/api/hotels', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(r => r.json())
+        .then(hotels => {
+            const tbody = document.getElementById('hotelsBody');
+            tbody.innerHTML = '';
+            hotels.forEach(h => {
+                const row = `
+                <tr>
+                    <td>${h.id}</td>
+                    <td>${h.name}</td>
+                    <td>${h.stars}</td>
+                    <td>${h.cityName}</td>
+                    <td><a href="/ui/hotels/${h.id}">Подробнее</a></td>
+                </tr>
+            `;
+                tbody.innerHTML += row;
+            });
+        })
+        .catch(err => console.error(err));
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/ui/login';
+    }
+</script>
+</body>
+</html>

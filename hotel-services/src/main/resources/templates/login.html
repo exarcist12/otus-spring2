@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <style>
+        body { padding: 50px; font-family: Arial, sans-serif; }
+        .field { margin: 10px 0; }
+        label { display: inline-block; width: 100px; }
+        input { width: 200px; }
+        .btn { padding: 5px 15px; cursor: pointer; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<h1>Вход</h1>
+<form id="loginForm">
+    <div class="field">
+        <label for="username">Логин:</label>
+        <input type="text" id="username" required />
+    </div>
+    <div class="field">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" required />
+    </div>
+    <button type="submit" class="btn">Войти</button>
+    <span id="error" class="error"></span>
+</form>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+            .then(r => {
+                if (!r.ok) throw new Error('Неверный логин или пароль');
+                return r.json();
+            })
+            .then(data => {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/ui/hotels';
+            })
+            .catch(err => {
+                document.getElementById('error').textContent = err.message;
+            });
+    });
+</script>
+</body>
+</html>
