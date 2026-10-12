@@ -48,4 +48,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("today") LocalDate today,
             @Param("statuses") Collection<BookingStatus> statuses
     );
+
+    @EntityGraph(attributePaths = {"user", "room", "room.hotel"})
+    @Query("SELECT b FROM Booking b ORDER BY b.createdAt DESC")
+    List<Booking> findAllWithDetails();
 }

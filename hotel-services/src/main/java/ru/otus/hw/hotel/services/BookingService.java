@@ -15,4 +15,8 @@ public interface BookingService {
     BookingDto create(CreateBookingRequest request, Long userId);
 
     BookingDto updateStatus(Long id, UpdateBookingStatusRequest request);
+
+    BookingDto cancel(Long id, Long userId);
+
+    List<BookingDto> findAll();
 }

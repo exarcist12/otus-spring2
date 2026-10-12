@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Комната')}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/ui/admin/hotels}">Админка — отели</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/ui/admin/hotels/{hotelId}/rooms(hotelId=${hotelId})}"
+                   th:text="${hotel.name}"></a>
+            </li>
+            <li class="breadcrumb-item active"
+                th:text="${editMode} ? 'Редактировать комнату' : 'Новая комната'"></li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="mb-4"
+                        th:text="${editMode} ? 'Редактировать комнату' : 'Новая комната'"></h3>
+
+                    <form th:action="${editMode}
+                            ? @{/ui/admin/hotels/{hotelId}/rooms/{id}(hotelId=${hotelId}, id=${roomId})}
+                            : @{/ui/admin/hotels/{hotelId}/rooms(hotelId=${hotelId})}"
+                          method="post"
+                          th:object="${form}">
+
+                        <!-- Для создания hotelId уже установлен в контроллере, но на всякий случай -->
+                        <input type="hidden" th:if="${!editMode}" th:field="*{hotelId}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Тип номера</label>
+                            <select th:field="*{type}" class="form-select"
+                                    th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
+                                <option value="">— выберите —</option>
+                                <option th:each="t : ${roomTypes}"
+                                        th:value="${t}"
+                                        th:text="${t}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{type}"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Цена за ночь (₽)</label>
+                                <input type="number" step="0.01" min="0.01"
+                                       th:field="*{pricePerNight}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('pricePerNight')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{pricePerNight}"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Вместимость (чел.)</label>
+                                <input type="number" min="1"
+                                       th:field="*{capacity}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{capacity}"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea th:field="*{description}" rows="3" class="form-control"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success"
+                                    th:text="${editMode} ? 'Сохранить' : 'Создать'"></button>
+                            <a th:href="@{/ui/admin/hotels/{hotelId}/rooms(hotelId=${hotelId})}"
+                               class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>

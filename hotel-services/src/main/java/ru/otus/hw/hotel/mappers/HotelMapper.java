@@ -40,7 +40,8 @@ public class HotelMapper {
                 hotel.getId(),
                 hotel.getName(),
                 hotel.getStars(),
-                hotel.getCity() != null ? hotel.getCity().getName() : null
+                hotel.getCity() != null ? hotel.getCity().getName() : null,
+                amenityMapper.toDtoList(hotel.getAmenities())
         );
     }
 

@@ -1,6 +1,9 @@
 package ru.otus.hw.hotel.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.hotel.dto.BookingDto;
@@ -47,7 +50,26 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Booking with id %d not found".formatted(id)));
         return bookingMapper.toDto(booking);
     }
+    @Override
+    public BookingDto cancel(Long id, Long userId) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking with id %d not found".formatted(id)));
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !booking.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Нельзя отменить чужую бронь");
+        }
+        if (booking.getStatus() == BookingStatus.CANCELLED
+                || booking.getStatus() == BookingStatus.COMPLETED) {
+            throw new IllegalArgumentException("Бронь уже нельзя отменить");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        return bookingMapper.toDto(bookingRepository.save(booking));
+    }
     @Override
     public BookingDto create(CreateBookingRequest request, Long userId) {
         if (!request.getCheckIn().isBefore(request.getCheckOut())) {
@@ -82,7 +104,6 @@ public class BookingServiceImpl implements BookingService {
 
         Booking saved = bookingRepository.save(booking);
 
-        // Вызов Payment Service (обёрнут в Circuit Breaker)
         PaymentRequest paymentRequest = new PaymentRequest(saved.getId(), totalPrice, "RUB", null);
         PaymentResponse paymentResponse = paymentClient.processPayment(paymentRequest);
 
@@ -105,4 +126,11 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(request.getStatus());
         return bookingMapper.toDto(bookingRepository.save(booking));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDto> findAll() {
+        return bookingMapper.toDtoList(bookingRepository.findAllWithDetails());
+    }
+
 }

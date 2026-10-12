@@ -17,4 +17,6 @@ public interface ReviewService {
     ReviewDto update(Long id, UpdateReviewRequest request, Long userId);
 
     void deleteById(Long id, Long userId);
+
+    boolean hasUserReviewedHotel(Long userId, Long hotelId);
 }

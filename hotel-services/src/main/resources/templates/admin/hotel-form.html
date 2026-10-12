@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Отель')}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="mb-4"
+                        th:text="${editMode} ? 'Редактировать отель' : 'Новый отель'"></h3>
+
+                    <form th:action="${editMode}
+                            ? @{/ui/admin/hotels/{id}(id=${hotelId})}
+                            : @{/ui/admin/hotels}"
+                          method="post"
+                          th:object="${form}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Название</label>
+                            <input type="text" th:field="*{name}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Адрес</label>
+                            <input type="text" th:field="*{address}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{address}"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Город</label>
+                                <select th:field="*{cityId}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('cityId')} ? 'is-invalid'">
+                                    <option value="">— выберите —</option>
+                                    <option th:each="c : ${cities}"
+                                            th:value="${c.id}"
+                                            th:text="|${c.name}, ${c.country}|"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{cityId}"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Звёзд</label>
+                                <input type="number" th:field="*{stars}" min="1" max="5"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('stars')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{stars}"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea th:field="*{description}" rows="4" class="form-control"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Удобства</label>
+                            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                                <div class="form-check" th:each="a : ${amenities}">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="amenityIds"
+                                           th:id="'amenity-' + ${a.id}"
+                                           th:value="${a.id}"
+                                           th:checked="${form.amenityIds != null and form.amenityIds.contains(a.id)}">
+                                    <label class="form-check-label"
+                                           th:for="'amenity-' + ${a.id}">
+                                        <i th:class="'bi bi-' + ${a.icon}"></i>
+                                        <span th:text="${a.name}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Отметьте нужные удобства</small>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success"
+                                    th:text="${editMode} ? 'Сохранить' : 'Создать'"></button>
+                            <a th:href="@{/ui/admin/hotels}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>

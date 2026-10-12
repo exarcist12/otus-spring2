@@ -30,7 +30,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        // 1. Spring Security проверяет логин/пароль
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -39,10 +39,8 @@ public class AuthController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 2. Генерируем JWT
         String token = jwtTokenProvider.generateToken(authentication);
 
-        // 3. Возвращаем токен + информацию о пользователе
         UserDto user = userService.findByUsername(request.getUsername());
         return new LoginResponse(token, user);
     }

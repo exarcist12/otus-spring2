@@ -17,4 +17,5 @@ public interface RoomService {
     RoomDto update(Long id, UpdateRoomRequest request);
 
     void deleteById(Long id);
+
 }

@@ -95,4 +95,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new AccessDeniedException("You can only edit your own reviews");
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasUserReviewedHotel(Long userId, Long hotelId) {
+        return reviewRepository.existsByUserIdAndHotelId(userId, hotelId);
+    }
 }

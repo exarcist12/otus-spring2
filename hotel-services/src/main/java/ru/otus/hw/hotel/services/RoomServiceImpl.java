@@ -14,6 +14,7 @@ import ru.otus.hw.hotel.models.Hotel;
 import ru.otus.hw.hotel.models.Room;
 import ru.otus.hw.hotel.repositories.BookingRepository;
 import ru.otus.hw.hotel.repositories.HotelRepository;
+import ru.otus.hw.hotel.repositories.ReviewRepository;
 import ru.otus.hw.hotel.repositories.RoomRepository;
 
 import java.time.LocalDate;
@@ -88,4 +89,5 @@ public class RoomServiceImpl implements RoomService {
         }
         roomRepository.deleteById(id);
     }
+
 }

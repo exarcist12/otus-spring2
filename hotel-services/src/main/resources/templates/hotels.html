@@ -1,74 +1,76 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Отели</title>
-    <style>
-        body { padding: 50px; font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; width: 700px; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        .btn { padding: 5px 15px; cursor: pointer; }
-        .header { margin-bottom: 20px; }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: head('Отели')}"></head>
 <body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
 
-<div class="header">
-    <h1>Отели</h1>
-    <span id="userInfo"></span>
-    <button class="btn" onclick="logout()">Выйти</button>
-</div>
+<main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Отели</h2>
+        <a sec:authorize="hasRole('ADMIN')"
+           th:href="@{/ui/admin/hotels/new}"
+           class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Добавить отель
+        </a>
+    </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Название</th>
-        <th>Звёзды</th>
-        <th>Город</th>
-        <th>Действия</th>
-    </tr>
-    </thead>
-    <tbody id="hotelsBody"></tbody>
-</table>
+    <form method="get" th:action="@{/ui/hotels}" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <select name="cityId" class="form-select">
+                <option value="">Все города</option>
+                <option th:each="city : ${cities}"
+                        th:value="${city.id}"
+                        th:text="${city.name}"
+                        th:selected="${city.id == selectedCityId}"></option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">Найти</button>
+            <a th:href="@{/ui/hotels}" class="btn btn-outline-secondary">Сбросить</a>
+        </div>
+    </form>
 
-<script>
-    const token = localStorage.getItem('token');
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="hotel : ${hotels}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${hotel.name}"></h5>
+                    <p class="card-text text-muted mb-2">
+                        <i class="bi bi-geo-alt"></i>
+                        <span th:text="${hotel.cityName}"></span>
+                    </p>
+                    <div class="text-warning mb-2">
+                        <span th:each="i : ${#numbers.sequence(1, hotel.stars)}">★</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5 - hotel.stars)}" class="text-muted">★</span>
+                    </div>
 
-    if (!token) {
-        window.location.href = '/ui/login';
-    }
+                    <!-- ↓ НОВОЕ: удобства -->
+                    <div class="mb-2" th:if="${not #lists.isEmpty(hotel.amenities)}">
+        <span th:each="a : ${hotel.amenities}"
+              class="badge bg-light text-dark border me-1 mb-1"
+              th:title="${a.name}">
+            <i th:class="'bi bi-' + ${a.icon}"></i>
+            <span th:text="${a.name}"></span>
+        </span>
+                    </div>
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    document.getElementById('userInfo').textContent = `${user.username} (${user.role})`;
+                    <a th:href="@{/ui/hotels/{id}(id=${hotel.id})}"
+                       class="btn btn-outline-primary w-100">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    fetch('/api/hotels', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
-        .then(r => r.json())
-        .then(hotels => {
-            const tbody = document.getElementById('hotelsBody');
-            tbody.innerHTML = '';
-            hotels.forEach(h => {
-                const row = `
-                <tr>
-                    <td>${h.id}</td>
-                    <td>${h.name}</td>
-                    <td>${h.stars}</td>
-                    <td>${h.cityName}</td>
-                    <td><a href="/ui/hotels/${h.id}">Подробнее</a></td>
-                </tr>
-            `;
-                tbody.innerHTML += row;
-            });
-        })
-        .catch(err => console.error(err));
+    <p th:if="${#lists.isEmpty(hotels)}" class="text-muted text-center py-4">
+        Отелей не найдено.
+    </p>
+</main>
 
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/ui/login';
-    }
-</script>
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
 </body>
 </html>
