@@ -13,6 +13,7 @@ import ru.otus.hw.hotel.dto.PaymentResponse;
 import ru.otus.hw.hotel.dto.UpdateBookingStatusRequest;
 import ru.otus.hw.hotel.enums.BookingStatus;
 import ru.otus.hw.hotel.exceptions.EntityNotFoundException;
+import ru.otus.hw.hotel.exceptions.PaymentUnavailableException;
 import ru.otus.hw.hotel.exceptions.RoomNotAvailableException;
 import ru.otus.hw.hotel.mappers.BookingMapper;
 import ru.otus.hw.hotel.models.Booking;
@@ -77,9 +78,11 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new EntityNotFoundException("Room with id %d not found".formatted(request.getRoomId())));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Room with id %d not found".formatted(request.getRoomId())));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User with id %d not found".formatted(userId)));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "User with id %d not found".formatted(userId)));
 
         var overlapping = bookingRepository.findOverlappingBookings(
                 request.getRoomId(),
@@ -94,28 +97,24 @@ public class BookingServiceImpl implements BookingService {
         long nights = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
         BigDecimal totalPrice = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
 
+        PaymentRequest paymentRequest = new PaymentRequest(null, totalPrice, "RUB", null);
+        PaymentResponse paymentResponse = paymentClient.processPayment(paymentRequest);
+
+        if (!"SUCCESS".equals(paymentResponse.getStatus())) {
+            throw new PaymentUnavailableException(
+                    "Платёж отклонён: " + paymentResponse.getMessage());
+        }
+
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setRoom(room);
         booking.setCheckIn(request.getCheckIn());
         booking.setCheckOut(request.getCheckOut());
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.PAID);
         booking.setTotalPrice(totalPrice);
+        booking.setPaymentId(paymentResponse.getPaymentId());
 
         Booking saved = bookingRepository.save(booking);
-
-        PaymentRequest paymentRequest = new PaymentRequest(saved.getId(), totalPrice, "RUB", null);
-        PaymentResponse paymentResponse = paymentClient.processPayment(paymentRequest);
-
-        if ("SUCCESS".equals(paymentResponse.getStatus())) {
-            saved.setStatus(BookingStatus.PAID);
-            saved.setPaymentId(paymentResponse.getPaymentId());
-            saved = bookingRepository.save(saved);
-        } else {
-            saved.setStatus(BookingStatus.CANCELLED);
-            saved = bookingRepository.save(saved);
-        }
-
         return bookingMapper.toDto(saved);
     }
 

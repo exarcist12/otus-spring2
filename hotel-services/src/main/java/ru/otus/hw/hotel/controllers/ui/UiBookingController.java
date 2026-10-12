@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.otus.hw.hotel.dto.BookingDto;
 import ru.otus.hw.hotel.dto.CreateBookingRequest;
 import ru.otus.hw.hotel.enums.BookingStatus;
+import ru.otus.hw.hotel.exceptions.PaymentUnavailableException;
 import ru.otus.hw.hotel.exceptions.RoomNotAvailableException;
 import ru.otus.hw.hotel.models.User;
 import ru.otus.hw.hotel.services.BookingService;
@@ -62,30 +63,25 @@ public class UiBookingController {
                          RedirectAttributes ra) {
 
         if (binding.hasErrors()) {
-            String msg = binding.getFieldErrors().stream()
-                    .map(e -> e.getField() + ": " + e.getDefaultMessage())
-                    .reduce((a, b) -> a + "; " + b)
-                    .orElse("Ошибка валидации");
-            ra.addFlashAttribute("error", msg);
+            ra.addFlashAttribute("error", formatErrors(binding));
             return "redirect:/ui/bookings/new?roomId=" + form.getRoomId();
         }
 
         User u = (User) auth.getPrincipal();
 
         try {
-            BookingDto result = bookingService.create(form, u.getId());
-
-            if (result.getStatus() != BookingStatus.PAID) {
-                ra.addFlashAttribute("error",
-                        "Платёж не прошёл (" + result.getStatus() + "). Попробуйте позже.");
-                return "redirect:/ui/bookings/new?roomId=" + form.getRoomId();
-            }
-
+            bookingService.create(form, u.getId());
             ra.addFlashAttribute("success", "Бронь создана и оплачена!");
             return "redirect:/ui/bookings/my";
+
+        } catch (PaymentUnavailableException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/ui/bookings/new?roomId=" + form.getRoomId();
+
         } catch (RoomNotAvailableException e) {
             ra.addFlashAttribute("error", "Номер недоступен на выбранные даты");
             return "redirect:/ui/bookings/new?roomId=" + form.getRoomId();
+
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/ui/bookings/new?roomId=" + form.getRoomId();
@@ -103,5 +99,12 @@ public class UiBookingController {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/ui/bookings/my";
+    }
+
+    private String formatErrors(BindingResult binding) {
+        return binding.getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("Ошибка валидации");
     }
 }
