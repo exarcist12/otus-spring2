@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Мои брони')}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+    <h2 class="mb-3" th:text="${isAdminView} ? 'Все брони' : 'Мои брони'"></h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th th:if="${isAdminView}">Пользователь</th>
+                <th>Отель / номер</th>
+                <th>Заезд</th>
+                <th>Выезд</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${bookings}">
+                <td th:text="${b.id}"></td>
+                <td th:if="${isAdminView}"
+                    th:text="${b.user != null ? b.user.username : '—'}"></td>
+                <td>
+                    <div th:text="${b.hotelName}"></div>
+                    <small class="text-muted" th:text="${b.room.type}"></small>
+                </td>
+                <td th:text="${#temporals.format(b.checkIn, 'dd.MM.yyyy')}"></td>
+                <td th:text="${#temporals.format(b.checkOut, 'dd.MM.yyyy')}"></td>
+                <td th:text="${b.totalPrice} + ' ₽'"></td>
+                <td>
+        <span class="badge"
+              th:classappend="${b.status.name() == 'PAID'} ? 'bg-success'
+                           : (${b.status.name() == 'PENDING'} ? 'bg-warning text-dark'
+                           : (${b.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary'))"
+              th:text="${b.status}"></span>
+                </td>
+                <td>
+                    <form th:if="${b.status.name() == 'PENDING' or b.status.name() == 'PAID'}"
+                          th:action="@{/ui/bookings/{id}/cancel(id=${b.id})}"
+                          method="post" class="d-inline"
+                          onsubmit="return confirm('Отменить бронь?');">
+                        <button class="btn btn-sm btn-outline-danger">Отменить</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${#lists.isEmpty(bookings)}" class="text-muted text-center py-4">
+        У вас пока нет броней. <a th:href="@{/ui/hotels}">Найти отель</a>
+    </p>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>

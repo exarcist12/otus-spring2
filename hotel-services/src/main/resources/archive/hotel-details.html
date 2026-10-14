@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отель</title>
+    <style>
+        body { padding: 50px; font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 700px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        .room { margin-top: 20px; }
+        .status-booked { color: red; font-weight: bold; }
+        .status-available { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<a href="/ui/hotels">← Назад</a>
+
+<h1 id="hotelName"></h1>
+<p><strong>Город:</strong> <span id="hotelCity"></span></p>
+<p><strong>Адрес:</strong> <span id="hotelAddress"></span></p>
+<p><strong>Звёзды:</strong> <span id="hotelStars"></span></p>
+<p><strong>Удобства:</strong> <span id="hotelAmenities"></span></p>
+
+<div class="room">
+    <h2>Номера</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Тип</th>
+            <th>Цена</th>
+            <th>Вместимость</th>
+            <th>Статус</th>
+            <th>Текущая бронь</th>
+        </tr>
+        </thead>
+        <tbody id="roomsBody"></tbody>
+    </table>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/ui/login';
+    }
+
+    const hotelId = window.location.pathname.split('/').pop();
+
+    fetch(`/api/hotels/${hotelId}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(r => r.json())
+        .then(hotel => {
+            document.getElementById('hotelName').textContent = hotel.name;
+            document.getElementById('hotelCity').textContent = hotel.city?.name || '';
+            document.getElementById('hotelAddress').textContent = hotel.address;
+            document.getElementById('hotelStars').textContent = '⭐'.repeat(hotel.stars);
+            document.getElementById('hotelAmenities').textContent =
+                (hotel.amenities || []).map(a => a.name).join(', ');
+        });
+
+    fetch(`/api/rooms?hotelId=${hotelId}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(r => r.json())
+        .then(rooms => {
+            const tbody = document.getElementById('roomsBody');
+            tbody.innerHTML = '';
+            rooms.forEach(room => {
+                const availability = room.availability || 'UNKNOWN';
+                const statusClass = availability === 'BOOKED' ? 'status-booked' : 'status-available';
+                const bookingInfo = room.currentBooking
+                    ? `${room.currentBooking.username}, ${room.currentBooking.checkIn} — ${room.currentBooking.checkOut}`
+                    : '—';
+
+                const row = `
+                <tr>
+                    <td>${room.id}</td>
+                    <td>${room.type}</td>
+                    <td>${room.pricePerNight}</td>
+                    <td>${room.capacity}</td>
+                    <td class="${statusClass}">${availability}</td>
+                    <td>${bookingInfo}</td>
+                </tr>
+            `;
+                tbody.innerHTML += row;
+            });
+        });
+</script>
+</body>
+</html>

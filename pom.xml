@@ -10,6 +10,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>hw01-xml-config</module>
+        <module>hotel-services</module>
+        <module>payment-services</module>
     </modules>
 
     <properties>

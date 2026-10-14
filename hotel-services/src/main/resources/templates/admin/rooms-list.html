@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Комнаты отеля')}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/ui/admin/hotels}">Админка — отели</a></li>
+            <li class="breadcrumb-item active" th:text="${hotel.name}"></li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 th:text="|Комнаты — ${hotel.name}|"></h2>
+        <a th:href="@{/ui/admin/hotels/{hotelId}/rooms/new(hotelId=${hotelId})}"
+           class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Добавить комнату
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Тип</th>
+                <th>Цена / ночь</th>
+                <th>Вместимость</th>
+                <th>Описание</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${rooms}">
+                <td th:text="${r.id}"></td>
+                <td th:text="${r.type}"></td>
+                <td th:text="${r.pricePerNight} + ' ₽'"></td>
+                <td th:text="${r.capacity} + ' чел.'"></td>
+                <td class="text-muted small" th:text="${r.description}"></td>
+                <td class="text-end">
+                    <a th:href="@{/ui/admin/hotels/{hotelId}/rooms/{id}/edit(hotelId=${hotelId}, id=${r.id})}"
+                       class="btn btn-sm btn-outline-warning">Ред.</a>
+                    <form th:action="@{/ui/admin/hotels/{hotelId}/rooms/{id}/delete(hotelId=${hotelId}, id=${r.id})}"
+                          method="post" class="d-inline"
+                          onsubmit="return confirm('Удалить комнату?');">
+                        <button class="btn btn-sm btn-outline-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${#lists.isEmpty(rooms)}" class="text-muted text-center py-4">
+        У отеля пока нет комнат. <a
+            th:href="@{/ui/admin/hotels/{hotelId}/rooms/new(hotelId=${hotelId})}">Добавить первую</a>
+    </p>
+
+    <a th:href="@{/ui/admin/hotels}" class="btn btn-outline-secondary">← К списку отелей</a>
+
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>

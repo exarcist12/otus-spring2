@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Админка — отели')}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Админка — отели</h2>
+        <div>
+            <a th:href="@{/ui/admin/cities}" class="btn btn-outline-secondary">Города</a>
+            <a th:href="@{/ui/admin/amenities}" class="btn btn-outline-secondary">Удобства</a>
+            <a th:href="@{/ui/admin/hotels/new}" class="btn btn-success">
+                <i class="bi bi-plus-lg"></i> Добавить отель
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Город</th>
+                <th>★</th>
+                <th>Удобства</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="h : ${hotels}">
+                <td th:text="${h.id}"></td>
+                <td>
+                    <a th:href="@{/ui/hotels/{id}(id=${h.id})}" th:text="${h.name}"></a>
+                </td>
+                <td th:text="${h.cityName}"></td>
+                <td class="text-warning" th:text="${h.stars} + ' ★'"></td>
+                <td>
+    <span th:each="a : ${h.amenities}"
+          class="badge bg-light text-dark border me-1 mb-1"
+          th:text="${a.name}"></span>
+                    <span th:if="${#lists.isEmpty(h.amenities)}" class="text-muted small">—</span>
+                </td>
+                <td class="text-end">
+                    <a th:href="@{/ui/admin/hotels/{hotelId}/rooms(hotelId=${h.id})}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-door-open"></i> Комнаты
+                    </a>
+                    <a th:href="@{/ui/admin/hotels/{id}/edit(id=${h.id})}"
+                       class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-pencil"></i> Редактировать
+                    </a>
+                    <form th:action="@{/ui/admin/hotels/{id}/delete(id=${h.id})}"
+                          method="post" class="d-inline"
+                          onsubmit="return confirm('Удалить отель?');">
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Удалить
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${#lists.isEmpty(hotels)}" class="text-muted text-center py-4">
+        Отелей нет. <a th:href="@{/ui/admin/hotels/new}">Добавить первый</a>
+    </p>
+
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>

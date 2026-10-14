@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: head(${hotel.name})}"></head>
+<body>
+<nav th:replace="~{layout/base :: navbar}"></nav>
+<div th:replace="~{layout/base :: alerts}"></div>
+
+<main class="container my-4">
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h2 th:text="${hotel.name}">Название отеля</h2>
+                    <p class="text-muted mb-1">
+                        <i class="bi bi-geo-alt"></i>
+                        <span th:text="|${hotel.city.name}, ${hotel.address}|"></span>
+                    </p>
+                    <div class="text-warning fs-5">
+                        <span th:each="i : ${#numbers.sequence(1, hotel.stars)}">★</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5 - hotel.stars)}" class="text-muted">★</span>
+                    </div>
+                </div>
+                <div sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/ui/admin/hotels/{id}/edit(id=${hotel.id})}"
+                       class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Редактировать
+                    </a>
+                </div>
+            </div>
+            <p class="mt-3 mb-2" th:text="${hotel.description}"></p>
+
+            <div class="mt-3">
+                <span th:each="amenity : ${hotel.amenities}"
+                      class="badge bg-secondary me-1">
+                    <i th:class="'bi bi-' + ${amenity.icon}"></i>
+                    <span th:text="${amenity.name}"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Комнаты</h3>
+    <div class="row">
+        <div class="col-md-4 mb-3" th:each="room : ${rooms}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 th:text="${room.type}">Тип</h5>
+                    <p class="text-muted small mb-2" th:text="${room.description}"></p>
+                    <p class="mb-1">
+                        <i class="bi bi-people"></i>
+                        до <span th:text="${room.capacity}"></span> чел.
+                    </p>
+                    <p class="fs-5 text-primary mb-3">
+                        <strong th:text="${room.pricePerNight}"></strong> ₽ / ночь
+                    </p>
+
+                    <div class="mt-auto">
+                        <a sec:authorize="isAuthenticated()"
+                           th:href="@{/ui/bookings/new(roomId=${room.id})}"
+                           class="btn btn-success w-100">
+                            <i class="bi bi-calendar-check"></i> Забронировать
+                        </a>
+                        <a sec:authorize="!isAuthenticated()"
+                           th:href="@{/login}"
+                           class="btn btn-outline-secondary w-100">
+                            Войдите, чтобы бронировать
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p th:if="${#lists.isEmpty(rooms)}" class="text-muted">Комнат пока нет.</p>
+
+    <hr class="my-5">
+
+    <h3 class="mb-3">Отзывы</h3>
+
+    <div sec:authorize="isAuthenticated()" th:if="${canReview}" class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h6 class="card-title mb-3">Оставить отзыв</h6>
+            <form th:action="@{/ui/hotels/{id}/reviews(id=${hotel.id})}"
+                  th:object="${reviewForm}" method="post">
+                <input type="hidden" th:field="*{hotelId}" th:value="${hotel.id}">
+
+                <div class="mb-2">
+        <textarea th:field="*{text}" class="form-control"
+                  rows="3" placeholder="Ваш отзыв..." required></textarea>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Оценка</label>
+                        <select th:field="*{rating}" class="form-select">
+                            <option th:each="i : ${#numbers.sequence(1, 5)}"
+                                    th:value="${i}" th:text="${i} + ' ★'"></option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary">Отправить отзыв</button>
+            </form>
+        </div>
+    </div>
+
+    <div sec:authorize="isAuthenticated()" th:if="${!canReview}" class="alert alert-info">
+        Вы уже оставляли отзыв об этом отеле.
+    </div>
+
+    <div th:each="review : ${reviews}" class="card mb-2 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <strong th:text="${review.user.username}"></strong>
+                <span class="text-warning" th:text="|${review.rating} ★|"></span>
+            </div>
+            <p class="mb-1 mt-2" th:text="${review.text}"></p>
+            <small class="text-muted"
+                   th:text="${#temporals.format(review.createdAt, 'dd.MM.yyyy HH:mm')}"></small>
+        </div>
+    </div>
+    <p th:if="${#lists.isEmpty(reviews)}" class="text-muted">Отзывов пока нет. Будьте первым!</p>
+
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<script th:replace="~{layout/base :: scripts}"></script>
+</body>
+</html>
